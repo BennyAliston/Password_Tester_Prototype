@@ -1,0 +1,13 @@
+Django>=5.2,<6.0
+zxcvbn
+pwnedpasswords
+requests
+# Development / CI tools
+pytest-django
+black
+flake8
+mypy
+# Optional: rate limiting and async task processing
+django-ratelimit
+celery
+redis

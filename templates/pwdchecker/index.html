@@ -2,386 +2,99 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <!-- Head section includes metadata, title, and external resources like fonts and stylesheets -->
-    <meta charset="UTF-8"> <!-- Specifies the character encoding for the document -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Ensures proper rendering on mobile devices -->
-    <title>Password Breach Analyzer</title> <!-- Title displayed in the browser tab -->
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"> <!-- External font -->
-    <style>
-        /* General body styling */
-        body {
-            background: linear-gradient(135deg, #0f2027 0%, #2c5364 100%); /* Gradient background */
-            color: #39ff14; /* Neon green text color */
-            font-family: 'Share Tech Mono', 'Fira Mono', 'Consolas', monospace; /* Monospace font */
-            padding: 4vw; /* Padding around the body */
-            min-height: 100vh; /* Ensure the body covers the full viewport height */
-            letter-spacing: 0.03em; /* Slight spacing between letters */
-            margin: 0; /* Remove default margin */
-        }
+    <!-- Head section includes metadata, title, and external resources -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Password Breach Analyzer - Check your password strength and breach status">
+    <title>Password Breach Analyzer</title>
 
-        /* Styling for the terminal-like container */
-        .terminal {
-            background: rgba(24,24,24,0.98); /* Dark semi-transparent background */
-            border-radius: 8px; /* Rounded corners */
-            box-shadow: 0 0 30px #00ffcc33, 0 0 3px #39ff14; /* Neon glow effect */
-            padding: 5vw 4vw; /* Padding inside the container */
-            margin-top: 5vw; /* Space above the container */
-            font-size: 1.1em; /* Slightly larger text */
-            min-height: 180px; /* Minimum height */
-            border: 1.5px solid #39ff14; /* Neon green border */
-            text-shadow: 0 0 2px #39ff14, 0 0 8px #00ffcc44; /* Text glow effect */
-            position: relative; /* Positioning context for child elements */
-            max-width: 700px; /* Maximum width */
-            margin-left: auto; /* Center horizontally */
-            margin-right: auto; /* Center horizontally */
-        }
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
-        /* Styling for buttons */
-        .form-btn {
-            height: 2.3em; /* Button height */
-            min-width: 90px; /* Minimum width */
-            font-size: 1em; /* Font size */
-            border-radius: 6px; /* Rounded corners */
-            border: none; /* Remove border */
-            background: #39ff14; /* Neon green background */
-            color: #181818; /* Dark text color */
-            font-weight: bold; /* Bold text */
-            transition: background 0.18s; /* Smooth background transition */
-            box-shadow: 0 0 5px #39ff1455; /* Subtle glow effect */
-            cursor: pointer; /* Pointer cursor on hover */
-        }
-
-        /* Hover effect for buttons */
-        .form-btn:hover {
-            background: #00fff7; /* Change background to neon blue */
-            color: #181818; /* Keep text color dark */
-        }
-
-        .results {
-            margin-top: 5vw;
-            padding: 4vw 3vw;
-            border: 1.2px solid #00fff7;
-            border-radius: 6px;
-            background: rgba(22, 34, 40, 0.92);
-            box-shadow: none;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        h1 {
-            font-size: 2.5em;
-            text-align: center;
-            margin-bottom: 1.5em;
-        }
-        .warning {
-            max-width: 700px;
-            margin: 0 auto 1.5em auto;
-            font-size: 1.05em;
-            padding: 1.2em 1em;
-            background: rgba(255,255,255,0.06);
-            border-radius: 8px;
-            border: 1px solid #39ff1455;
-        }
-        form {
-            width: 100%;
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        label, input, button, select {
-            font-size: 1em;
-        }
-        input, button, select {
-            max-width: 100%;
-            box-sizing: border-box;
-        }
-        .flex-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1em;
-        }
-        .flex-col {
-            display: flex;
-            flex-direction: column;
-            gap: 0.7em;
-        }
-        @media (max-width: 900px) {
-            h1 {
-                font-size: 2em;
-            }
-            .terminal, .results, .warning, form {
-                max-width: 98vw;
-                padding: 5vw 2vw;
-            }
-        }
-        @media (max-width: 600px) {
-            body {
-                padding: 2vw;
-            }
-            h1 {
-                font-size: 1.4em;
-                margin-bottom: 1em;
-            }
-            .terminal, .results, .warning, form {
-                max-width: 100vw;
-                padding: 4vw 2vw;
-                font-size: 1em;
-            }
-            .flex-row {
-                flex-direction: column;
-                gap: 0.5em;
-            }
-        }
-        /* Responsive form row/column helpers */
-        .form-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 0.5em;
-            max-width: 500px;
-            flex-direction: row;
-        }
-        .form-col {
-            flex: 1;
-            max-width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 0.3em;
-        }
-        .form-btn-col {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4em;
-            align-items: flex-start;
-            width: auto;
-        }
-        .form-btn, .btn, button[type="submit"], button[type="button"] {
-            width: auto;
-            min-width: 120px;
-            box-sizing: border-box;
-        }
-        @media (max-width: 600px) {
-            .form-row {
-                flex-direction: column;
-                gap: 0.5em;
-                max-width: 100%;
-            }
-            .form-col {
-                max-width: 100%;
-            }
-            .form-btn-col {
-                width: 100%;
-            }
-            .form-btn, .btn, button[type="submit"], button[type="button"] {
-                width: 100%;
-                min-width: 0;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-            }
-        }
-        /* Existing styles below remain unchanged */
-        .score-0, .score-1 { color: #ff3333; }
-        .score-2 { color: #ffcc00; }
-        .score-3, .score-4 { color: #39ff14; }
-        .breached { color: #ff3333; font-weight: bold; }
-        .not-breached { color: #39ff14; }
-        .error { color: #ff3333; font-weight: bold; }
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            background: #39ff14;
-            animation: blink 1s steps(2, start) infinite;
-            margin-left: 2px;
-        }
-        @keyframes blink {
-            to { background: transparent; }
-        }
-        a, a:visited { color: #00fff7; text-decoration: underline; }
-        .darkweb-scan {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 18px 0 22px 0;
-            font-size: 1.18em;
-            color: #00fff7;
-            font-family: inherit;
-        }
-        .darkweb-spinner {
-            width: 22px;
-            height: 22px;
-            border: 3px solid #222;
-            border-top: 3px solid #00fff7;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .breach-indicator {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 18px 0 18px 0;
-            padding: 14px 18px;
-            border-radius: 7px;
-            font-size: 1.13em;
-            font-weight: bold;
-        }
-        .breach-indicator.breached {
-            background: rgba(255,51,51,0.18);
-            border: 1.5px solid #ff3333;
-            color: #ff3333;
-        }
-        .breach-indicator.not-breached {
-            background: rgba(39,255,100,0.13);
-            border: 1.5px solid #39ff14;
-            color: #39ff14;
-        }
-        footer {
-            margin-top: 40px;
-            color: #fff;
-            background: rgba(39,255,100,0.13);
-            font-size: 1.08em;
-            border-radius: 10px;
-            box-shadow: none;
-            padding: 18px 24px;
-            text-align: center;
-            letter-spacing: 0.02em;
-        }
-        ::selection {
-            background: #00fff799;
-            color: #111;
-        }
-        ul { margin-left: 1em; }
-        input[type="password"],
-        input[type="text"] {
-            width: 100%;
-            padding-right: 2.6em;
-            min-width: 180px;
-            max-width: 320px;
-            box-sizing: border-box;
-            height: 2.3em;
-            line-height: 2.3em;
-            font-size: 1em;
-            border-radius: 6px;
-            border: 1.2px solid #39ff14;
-            background: #181818;
-            color: #39ff14;
-        }
-        .btn, button[type="submit"], button[type="button"] {
-            background: linear-gradient(90deg, #00fff7 0%, #39ff14 100%);
-            color: #222;
-            border: none;
-            border-radius: 5px;
-            padding: 7px 18px;
-            font-weight: 600;
-            font-size: 1em;
-            cursor: pointer;
-            margin: 4px 0;
-            transition: background 0.2s;
-        }
-        .btn:hover, button[type="submit"]:hover, button[type="button"]:hover {
-            background: linear-gradient(90deg, #39ff14 0%, #00fff7 100%);
-        }
-        .file-input {
-            display: none;
-        }
-        .file-label {
-            display: inline-block;
-            background: linear-gradient(90deg, #00fff7 0%, #39ff14 100%);
-            color: #222;
-            border: none;
-            border-radius: 5px;
-            padding: 7px 18px;
-            font-weight: 600;
-            font-size: 1em;
-            cursor: pointer;
-            margin: 4px 0;
-            transition: background 0.2s;
-        }
-        .file-label:hover {
-            background: linear-gradient(90deg, #39ff14 0%, #00fff7 100%);
-        }
-        .filename {
-            font-size:0.95em;
-            margin-left:10px;
-            color:#00fff7;
-        }
-        /* Ensure all result text is selectable on all devices */
-        body, .result-box, .error, .strong {
-            -webkit-user-select: text !important;
-            -moz-user-select: text !important;
-            -ms-user-select: text !important;
-            user-select: text !important;
-        }
-    </style>
+    <!-- External Stylesheets -->
+    <link rel="stylesheet" href="{% static 'pwdchecker/styles.css' %}">
 </head>
+
 <body>
-    <!-- This file is the main HTML template for the `pwdchecker` app. -->
-    <!-- It provides the user interface for password analysis, dictionary management, and password generation. -->
+    <h1>&#128273; Password Analyzer</h1>
 
-    <h1>&#128273; Password Analyzer</h1> <!-- Main heading with a lock emoji -->
-
-    <!-- Warning section to inform users about ethical usage -->
+    <!-- Warning section for ethical usage -->
     <div class="warning">
-        <p>⚠️ <b>For educational/ethical use only!</b> Do <u>not</u> test real passwords. This tool demonstrates how attackers analyze passwords and why strong passwords matter.</p>
+        <p>⚠️ <b>For educational/ethical use only!</b> Do <u>not</u> test real passwords. This tool demonstrates how
+            attackers analyze passwords and why strong passwords matter.</p>
     </div>
 
-    <!-- Form for password analysis -->
+    <!-- Password Analysis Form -->
     <form method="post" enctype="multipart/form-data" style="margin-bottom:1.5em;">
-        {% csrf_token %} <!-- Django CSRF token for security -->
+        {% csrf_token %}
         <label for="password" style="margin-right:8px;">Enter Password:</label>
         <div class="form-row">
             <div class="form-col">
-                <input type="password" id="password" name="password" required autofocus oninput="updateStrengthMeter()" aria-label="Enter password"> <!-- Password input field -->
+                <input type="password" id="password" name="password" required autofocus aria-label="Enter password">
                 <label style="font-size:0.98em;cursor:pointer;user-select:none;">
-                    <input type="checkbox" id="show_password" onchange="togglePassword('password', this)" aria-label="Show main password"> Show Password <!-- Checkbox to toggle password visibility -->
+                    <input type="checkbox" id="show_password" onchange="togglePassword('password', this)"
+                        aria-label="Show main password"> Show Password
                 </label>
             </div>
             <div class="form-btn-col">
-                <button type="submit" class="form-btn" aria-label="Analyze password">Analyze</button> <!-- Submit button for analysis -->
+                <button type="submit" class="form-btn" aria-label="Analyze password">Analyze</button>
             </div>
         </div>
         <br><br>
         <label for="compare_password" style="margin-right:8px;">Compare with:</label>
         <div class="form-row">
             <div class="form-col">
-                <input type="password" id="compare_password" name="compare_password" placeholder="(optional)" aria-label="Compare password"> <!-- Optional password comparison field -->
+                <input type="password" id="compare_password" name="compare_password" placeholder="(optional)"
+                    aria-label="Compare password">
                 <label style="font-size:0.98em;cursor:pointer;user-select:none;margin-top:0.2em;">
-                    <input type="checkbox" id="show_compare_password" onchange="togglePassword('compare_password', this)" aria-label="Show compare password"> Show Password <!-- Checkbox to toggle comparison password visibility -->
+                    <input type="checkbox" id="show_compare_password"
+                        onchange="togglePassword('compare_password', this)" aria-label="Show compare password"> Show
+                    Password
                 </label>
                 <div style="margin-top:0.6em;display:flex;flex-direction:column;gap:0.4em;">
                     <label style="font-size:0.96em;">Password Options:</label>
                     <div style="display:flex;align-items:center;gap:1em;flex-wrap:wrap;">
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_upper" checked aria-label="Include uppercase letters"> Uppercase</label>
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_lower" checked aria-label="Include lowercase letters"> Lowercase</label>
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_num" checked aria-label="Include numbers"> Numbers</label>
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_sym" checked aria-label="Include symbols"> Symbols</label>
-                        <label style="font-size:0.95em;">Length: <input type="number" id="opt_len" min="8" max="32" value="14" style="width:3em;" aria-label="Password length"></label>
+                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_upper" checked
+                                aria-label="Include uppercase letters"> Uppercase</label>
+                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_lower" checked
+                                aria-label="Include lowercase letters"> Lowercase</label>
+                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_num" checked
+                                aria-label="Include numbers"> Numbers</label>
+                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_sym" checked
+                                aria-label="Include symbols"> Symbols</label>
+                        <label style="font-size:0.95em;">Length: <input type="number" id="opt_len" min="8" max="32"
+                                value="14" style="width:3em;" aria-label="Password length"></label>
                     </div>
                 </div>
             </div>
             <div class="form-btn-col">
-                <button type="button" class="form-btn" onclick="copyToClipboard('compare_password')" aria-label="Copy compare password">Copy</button> <!-- Button to copy comparison password -->
-                <button type="button" class="form-btn" onclick="suggestComparePassword()" aria-label="Suggest password">Suggest Password</button> <!-- Button to suggest a password -->
+                <button type="button" class="form-btn" onclick="copyToClipboard('compare_password')"
+                    aria-label="Copy compare password">Copy</button>
+                <button type="button" class="form-btn" onclick="suggestComparePassword()"
+                    aria-label="Suggest password">Suggest Password</button>
             </div>
         </div>
     </form>
 
-    <!-- Section for uploading or deleting custom dictionaries -->
+    <!-- Custom Dictionary Upload Form -->
     <form method="post" enctype="multipart/form-data" style="margin-bottom:1.5em;" id="dict-upload-form">
         {% csrf_token %}
         <label for="custom_dict">Upload Custom Disallowed Words/Phrases (.txt):</label>
-        <input type="file" id="custom_dict" name="custom_dict" accept=".txt" class="file-input" onchange="showFilename(this)" aria-label="Upload custom dictionary"> <!-- File input for custom dictionary -->
+        <input type="file" id="custom_dict" name="custom_dict" accept=".txt" class="file-input"
+            onchange="showFilename(this)" aria-label="Upload custom dictionary">
         <label for="custom_dict" class="file-label">Choose File</label>
-        <span id="filename" class="filename" aria-live="polite"></span> <!-- Displays the selected file name -->
-        <button type="submit" class="form-btn" style="margin-top:0.8em;">Upload Dictionary</button> <!-- Button to upload dictionary -->
-        <button type="submit" name="delete_custom_dict" value="1" class="form-btn" style="background:#ff3333;color:#fff;margin-top:0.8em;">Delete Custom Dictionary</button> <!-- Button to delete dictionary -->
+        <span id="filename" class="filename" aria-live="polite"></span>
+        <button type="submit" class="form-btn" style="margin-top:0.8em;">Upload Dictionary</button>
+        <button type="submit" name="delete_custom_dict" value="1" class="form-btn"
+            style="background:#ff3333;color:#fff;margin-top:0.8em;">Delete Custom Dictionary</button>
         {% if custom_dict_status %}
-            <div class="results" style="margin-top:1em;">{{ custom_dict_status }}</div>
+        <div class="results" style="margin-top:1em;">{{ custom_dict_status }}</div>
         {% endif %}
     </form>
+
+    <!-- Generated Password Display -->
     {% if generated_password %}
     <div class="results" style="margin-top:10px;">
         <b>Suggested Strong Password:</b>
@@ -389,135 +102,17 @@
         <button type="button" onclick="copyGenerated()">Copy</button>
     </div>
     {% endif %}
-    <div id="strength-meter" style="height:8px;width:100%;background:#222;border-radius:4px;overflow:hidden;margin-bottom:1em;"><div id="strength-bar" style="height:100%;width:0;background:#39ff14;transition:width 0.3s;"></div></div>
+
+    <!-- Strength Meter -->
+    <div class="strength-meter">
+        <div id="strength-bar" class="strength-bar"></div>
+    </div>
     <div id="strength-feedback" style="margin-bottom:1em;font-size:1em;"></div>
     <ul id="policy-list" style="margin-bottom:1em;font-size:0.98em;"></ul>
     <div id="entropy-display" style="margin-bottom:1em;font-size:0.98em;"></div>
     <div id="breach-warning" style="margin-bottom:1em;font-size:1em;color:#ff3333;"></div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
-    <script src="/static/pwdchecker/main.js"></script>
-    <script>
-    (function(){
-        const hibpToken = '{{ hibp_token|default:""|escapejs }}';
-        if (!hibpToken) return;
 
-        async function pollOnce() {
-            // Use Django's URL resolver so we don't hardcode the app prefix.
-            const url = "{% url 'hibp_status' %}?token=" + encodeURIComponent(hibpToken);
-            try {
-                const r = await fetch(url, {cache: 'no-store'});
-                if (!r.ok) return false;
-                const j = await r.json();
-                if (j.status === 'ready') {
-                    const count = j.hibp_count;
-                    const el = document.getElementById('breach-warning');
-                    if (count && count > 0) {
-                        el.textContent = `Found in ${count} breaches!`;
-                        el.className = 'breach-indicator breached';
-                    } else if (count === 0) {
-                        el.textContent = 'Not found in breaches.';
-                        el.className = 'breach-indicator not-breached';
-                    } else {
-                        el.textContent = 'HIBP check error.';
-                        el.className = 'error';
-                    }
-                    return true;
-                }
-            } catch (e) {
-                console.error('HIBP poll error', e);
-            }
-            return false;
-        }
-
-        (async function pollLoop(){
-            const max = 12;
-            for (let i=0;i<max;i++){
-                const ok = await pollOnce();
-                if (ok) break;
-                await new Promise(r=>setTimeout(r, 5000));
-            }
-        })();
-    })();
-    </script>
-    <script>
-    // Function to toggle password visibility
-    function togglePassword(inputId, checkbox) {
-        const input = document.getElementById(inputId); // Get the password input field by ID
-        input.type = checkbox.checked ? 'text' : 'password'; // Toggle between 'text' and 'password' types
-    }
-
-    // Function to suggest a strong password
-    function suggestPassword() {
-        // Define a character set for generating passwords
-        const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}";
-        let password = "";
-        for (let i = 0; i < 14; i++) {
-            password += charset.charAt(Math.floor(Math.random() * charset.length)); // Randomly select characters
-        }
-        const pwInput = document.getElementById('password'); // Get the password input field
-        pwInput.value = password; // Set the generated password
-        // Optionally, update the strength meter if the function exists
-        if (typeof updateStrengthMeter === 'function') updateStrengthMeter();
-    }
-
-    // Function to suggest a password for comparison
-    function suggestComparePassword() {
-        // Build a character set based on user-selected options
-        let charset = '';
-        if (document.getElementById('opt_upper').checked) charset += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        if (document.getElementById('opt_lower').checked) charset += 'abcdefghijklmnopqrstuvwxyz';
-        if (document.getElementById('opt_num').checked) charset += '0123456789';
-        if (document.getElementById('opt_sym').checked) charset += '!@#$%^&*()-_=+[]{}';
-        let len = parseInt(document.getElementById('opt_len').value) || 14; // Default length is 14
-        if (!charset) charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'; // Fallback charset
-        let password = '';
-        for (let i = 0; i < len; i++) {
-            password += charset.charAt(Math.floor(Math.random() * charset.length)); // Randomly select characters
-        }
-        const pwInput = document.getElementById('compare_password'); // Get the comparison password input field
-        pwInput.value = password; // Set the generated password
-    }
-
-    // Function to copy text to clipboard
-    function copyToClipboard(id) {
-        const el = document.getElementById(id); // Get the element by ID
-        if (el && el.value) {
-            // Try modern clipboard API first
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(el.value).then(showCopyToast, fallbackCopy);
-            } else {
-                fallbackCopy();
-            }
-        }
-        function fallbackCopy() {
-            // Fallback for older browsers
-            const temp = document.createElement('textarea');
-            temp.value = el.value;
-            temp.setAttribute('readonly', '');
-            temp.style.position = 'absolute';
-            temp.style.left = '-9999px';
-            document.body.appendChild(temp);
-            temp.select();
-            try {
-                document.execCommand('copy');
-                showCopyToast();
-            } catch (err) {}
-            document.body.removeChild(temp);
-        }
-    }
-
-    // Function to display a toast message when text is copied
-    function showCopyToast() {
-        const toast = document.getElementById('copy-toast'); // Get the toast element
-        if (toast) {
-            toast.style.display = 'block'; // Show the toast
-            setTimeout(() => {
-                toast.style.display = 'none'; // Hide the toast after 2 seconds
-            }, 2000);
-        }
-    }
-    </script>
-    <div id="copy-toast" style="display:none;position:fixed;top:24px;right:24px;z-index:1000;background:#222;color:#39ff14;padding:12px 24px;border-radius:8px;box-shadow:0 0 10px #39ff1444;font-size:1.08em;transition:opacity 0.2s;opacity:0.97;">Copied!</div>
+    <!-- Password Comparison Results -->
     {% if compare %}
     <div class="results" style="margin-bottom:1em;">
         <b>Comparison:</b>
@@ -527,171 +122,183 @@
         </ul>
     </div>
     {% endif %}
+
+    <!-- Password Policy Results -->
     {% if policy_results %}
     <div class="results" style="margin-bottom:1em;">
         <b>Password Policy:</b>
         <ul>
-        {% for desc, ok in policy_results %}
+            {% for desc, ok in policy_results %}
             <li>{% if ok %}✅{% else %}❌{% endif %} {{ desc }}</li>
-        {% endfor %}
+            {% endfor %}
         </ul>
     </div>
     {% endif %}
+
+    <!-- Deep Security Checks -->
     {% if results.extra_checks %}
     <div class="results" style="margin-bottom:1em;">
         <b>Deep Security Checks:</b>
         <ul>
-        {% for msg in results.extra_checks %}
+            {% for msg in results.extra_checks %}
             <li>⚠️ {{ msg }}</li>
-        {% endfor %}
+            {% endfor %}
         </ul>
     </div>
     {% endif %}
+
+    <!-- Hacker Steps Terminal Display -->
     {% if hacker_steps %}
     {{ hacker_steps|json_script:"hackerSteps" }}
     <div class="terminal" id="hacker-log">
         <pre id="terminal-output"></pre><span class="cursor"></span>
     </div>
-    <script>
-    // Typewriter effect for hacker steps
-    const steps = JSON.parse(document.getElementById('hackerSteps').textContent);
-    const output = document.getElementById('terminal-output');
-    let line = 0, char = 0;
-    function typeStep() {
-        if (line < steps.length) {
-            if (char < steps[line].length) {
-                output.textContent += steps[line][char++];
-                setTimeout(typeStep, 15);
-            } else {
-                output.textContent += '\n';
-                line++;
-                char = 0;
-                setTimeout(typeStep, 250);
-            }
-        }
-    }
-    typeStep();
-    </script>
     {% endif %}
+
+    <!-- Main Results -->
     {% if results %}
-        <div class="results">
-            <h2>Results for: <span style="color:#fff">{{ password_checked|slice:":3" }}...</span></h2>
-            {% if results.error %}
-                 <p class="error">An error occurred: {{ results.error }}</p>
-            {% endif %}
-            <div id="darkwebScanContainer"></div>
-            <div id="breachIndicatorContainer" style="display:none;"></div>
-            <script>
-            // Dark web scan mock animation and breach indicator
-            document.addEventListener('DOMContentLoaded', function() {
-                var hibpCount = parseInt("{{ results.hibp_count|default:'0' }}", 10);
-                var scanContainer = document.getElementById('darkwebScanContainer');
-                var indicatorContainer = document.getElementById('breachIndicatorContainer');
-                scanContainer.innerHTML = `<div class='darkweb-scan'><div class='darkweb-spinner'></div>Scanning the dark web for breaches...</div>`;
-                setTimeout(function() {
-                    scanContainer.innerHTML = '';
-                    indicatorContainer.style.display = 'flex';
-                    if (hibpCount > 0) {
-                        indicatorContainer.innerHTML = `<div class='breach-indicator breached'>480 <span style='font-size:1.1em;'><b>Warning!</b><br>Your password has been found in known data leaks.<br><br><b>What does this mean?</b><br>Hackers may already know your password.<br><br><b>What should you do?</b><ul style='text-align:left; margin: 0 0 0 1.2em;'><li>Stop using this password immediately.</li><li>Create a new, strong password that you have never used before.</li><li>Never reuse passwords across different websites.</li></ul></span></div>`;
-                    } else if (hibpCount === 0) {
-                        indicatorContainer.innerHTML = `<div class='breach-indicator not-breached'>512 <span style='font-size:1.1em;'><b>Good news!</b><br>Your password was not found in any known data leaks.<br><br>This does not guarantee it is 100% safe.<br><b>Tips:</b> Make sure your password is long, unique, and hard to guess.</span></div>`;
-                    } else {
-                        indicatorContainer.innerHTML = `<div class='breach-indicator' style='color:#ffcc00;border:1.5px solid #ffcc00;background:rgba(255,204,0,0.09);'>50e <span style='font-size:1.1em;'><b>Scan result unknown</b><br>We couldn't check your password due to a network error. Please try again later.</span></div>`;
-                    }
-                }, 1800);
-            });
-            </script>
-            {% if basic_feedback %}
-                <div class="results" style="border-color:#ffcc00;">
-                    <h3>Basic Checks</h3>
-                    <ul>
-                        {% for item in basic_feedback %}
-                            <li>{{ item }}</li>
-                        {% endfor %}
-                    </ul>
-                    {% if basic_feedback|length == 0 %}
-                        <span style="color:#39ff14;">All basic password requirements are met!</span>
-                    {% endif %}
-                </div>
-            {% endif %}
+    <div class="results">
+        <h2>Results for: <span style="color:#fff">{{ password_checked|slice:":3" }}...</span></h2>
+        {% if results.error %}
+        <p class="error">An error occurred: {{ results.error }}</p>
+        {% endif %}
 
-            {% if advanced_feedback %}
-                <div class="results" style="border-color:#00fff7;">
-                    <h3>Advanced Insights</h3>
-                    <ul>
-                        {% for item in advanced_feedback %}
-                            <li>{{ item }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
+        <!-- Dark Web Scan Animation Container -->
+        <div id="darkwebScanContainer"></div>
+        <div id="breachIndicatorContainer" style="display:none;"></div>
 
-            {% if results.zxcvbn_result %}
-                <h3>Strength Analysis (zxcvbn):</h3>
-                <p><strong>Score:</strong> <span class="score-{{ results.zxcvbn_result.score }}">
-                    {{ results.zxcvbn_result.score }} / 4
-                    {% if results.zxcvbn_result.score == 0 %} (Very Weak)
-                    {% elif results.zxcvbn_result.score == 1 %} (Weak)
-                    {% elif results.zxcvbn_result.score == 2 %} (Fair)
-                    {% elif results.zxcvbn_result.score == 3 %} (Good)
-                    {% elif results.zxcvbn_result.score == 4 %} (Strong)
-                    {% endif %}
-                </span></p>
-                <p><strong>Estimated time to crack (online, fast hashing):</strong> {{ results.zxcvbn_result.crack_times_display.online_throttling_100_per_hour }}</p>
-                <p><strong>Estimated time to crack (offline, slow hashing):</strong> {{ results.zxcvbn_result.crack_times_display.offline_slow_hashing_1e4_per_second }}</p>
-                {% if results.zxcvbn_result.feedback.warning %}
-                    <p><strong>Warning:</strong> <span style="color: #ffcc00;">{{ results.zxcvbn_result.feedback.warning }}</span></p>
-                {% endif %}
-                {% if results.zxcvbn_result.feedback.suggestions %}
-                    <p><strong>Suggestions:</strong></p>
-                    <ul>
-                    {% for s in results.zxcvbn_result.feedback.suggestions %}
-                        <li>{{ s }}</li>
-                    {% endfor %}
-                    </ul>
-                {% endif %}
-            {% endif %}
-            <h3>Analysis Report:</h3>
+        {% if basic_feedback %}
+        <div class="results" style="border-color:#ffcc00;">
+            <h3>Basic Checks</h3>
             <ul>
-                <li><b>Entropy:</b> {{ results.entropy }} bits</li>
-                <li><b>Keyboard Patterns:</b> {% if results.keyboard_patterns %}<span class="error">{{ results.keyboard_patterns|join:", " }}</span>{% else %}None detected{% endif %}</li>
-                <li><b>Leet/Dictionary Matches:</b> {% if results.leet_matches %}<span class="error">{{ results.leet_matches|join:", " }}</span>{% else %}None detected{% endif %}</li>
-                <li><b>Brute-force time (1B/sec):</b>
-                    {% if results.brute_force_seconds < 0.01 %}
-                        <span class="error">&lt; 0.01 seconds (Very Weak)</span>
-                    {% elif results.brute_force_seconds < 60 %}
-                        <span class="error">{{ results.brute_force_seconds|floatformat:4 }} seconds (Very Weak)</span>
-                    {% elif results.brute_force_seconds < 3600 %}
-                        <span class="error">{{ results.brute_force_minutes|floatformat:2 }} minutes (Weak)</span>
-                    {% elif results.brute_force_seconds < 86400 %}
-                        {{ results.brute_force_hours|floatformat:2 }} hours
-                    {% elif results.brute_force_seconds < 31536000 %}
-                        {{ results.brute_force_days|floatformat:2 }} days
-                    {% elif results.brute_force_seconds < 31851360 %}
-                        <span class="strong">&lt; 1 year</span>
-                    {% else %}
-                        {{ results.brute_force_years|floatformat:2 }} years
-                    {% endif %}
-                </li>
-                <li><b>HIBP Breach Count:</b> {% if results.hibp_count > 0 %}<span class="breached">Found in {{ results.hibp_count }} breaches!</span>{% elif results.hibp_count == 0 %}<span class="not-breached">Not found in breaches</span>{% else %}Unknown (network error?){% endif %}</li>
+                {% for item in basic_feedback %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% if basic_feedback|length == 0 %}
+            <span style="color:#39ff14;">All basic password requirements are met!</span>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% if advanced_feedback %}
+        <div class="results" style="border-color:#00fff7;">
+            <h3>Advanced Insights</h3>
+            <ul>
+                {% for item in advanced_feedback %}
+                <li>{{ item }}</li>
+                {% endfor %}
             </ul>
         </div>
+        {% endif %}
+
+        {% if results.zxcvbn_result %}
+        <h3>Strength Analysis (zxcvbn):</h3>
+        <p><strong>Score:</strong> <span class="score-{{ results.zxcvbn_result.score }}">
+                {{ results.zxcvbn_result.score }} / 4
+                {% if results.zxcvbn_result.score == 0 %} (Very Weak)
+                {% elif results.zxcvbn_result.score == 1 %} (Weak)
+                {% elif results.zxcvbn_result.score == 2 %} (Fair)
+                {% elif results.zxcvbn_result.score == 3 %} (Good)
+                {% elif results.zxcvbn_result.score == 4 %} (Strong)
+                {% endif %}
+            </span></p>
+        {% if crack_times_display %}
+        <p><strong>Estimated time to crack (online, fast hashing):</strong>
+            {{ crack_times_display.online_throttling_100_per_hour }}</p>
+        <p><strong>Estimated time to crack (offline, slow hashing):</strong>
+            {{ crack_times_display.offline_slow_hashing_1e4_per_second }}</p>
+        <p><strong>Estimated time to crack (offline, fast hashing):</strong>
+            {{ crack_times_display.offline_fast_hashing_1e10_per_second }}</p>
+        {% endif %}
+        {% if results.zxcvbn_result.feedback.warning %}
+        <p><strong>Warning:</strong> <span style="color: #ffcc00;">{{ results.zxcvbn_result.feedback.warning }}</span>
+        </p>
+        {% endif %}
+        {% if results.zxcvbn_result.feedback.suggestions %}
+        <p><strong>Suggestions:</strong></p>
+        <ul>
+            {% for s in results.zxcvbn_result.feedback.suggestions %}
+            <li>{{ s }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
+        <h3>Analysis Report:</h3>
+        <ul>
+            <li><b>Entropy:</b> {{ results.entropy|default:"N/A" }} bits</li>
+            <li><b>Keyboard Patterns:</b>
+                {% if results.keyboard_patterns %}
+                <span class="error">{{ results.keyboard_patterns|join:", " }}</span>
+                {% else %}
+                None detected
+                {% endif %}
+            </li>
+            <li><b>Leet/Dictionary Matches:</b>
+                {% if results.leet_matches %}
+                <span class="error">{{ results.leet_matches|join:", " }}</span>
+                {% else %}
+                None detected
+                {% endif %}
+            </li>
+            <li><b>Brute-force time (1B/sec):</b> {{ results.brute_force_label|default:"N/A" }}</li>
+            <li><b>HIBP Breach Count:</b>
+                {% if results.hibp_count > 0 %}
+                <span class="breached">Found in {{ results.hibp_count }} breaches!</span>
+                {% elif results.hibp_count == 0 %}
+                <span class="not-breached">Not found in breaches</span>
+                {% else %}
+                Unknown (network error?)
+                {% endif %}
+            </li>
+        </ul>
+    </div>
     {% endif %}
 
-    <!-- Privacy statement to assure users about data safety -->
-    <div class="privacy" style="margin: 24px auto 0 auto; max-width: 700px; background: rgba(39,255,100,0.13); color: #fff; border-radius: 10px; padding: 18px 24px; font-size: 1.08em; text-align: center; box-shadow: none; letter-spacing: 0.02em;">
-        <b>Privacy Statement:</b> This tool does <u>not</u> store, save, or log any passwords you enter. All password analysis is performed in-memory and is never retained or shared. For your safety, do not use real or sensitive passwords.
+    <!-- Privacy Statement -->
+    <div class="privacy">
+        <b>Privacy Statement:</b> This tool does <u>not</u> store, save, or log any passwords you enter. All password
+        analysis is performed in-memory and is never retained or shared. For your safety, do not use real or sensitive
+        passwords.
     </div>
 
-    <!-- Footer with additional resources and credits -->
-    <footer style="margin-top:40px; color:#fff; background:rgba(39,255,100,0.13); font-size:1.08em; border-radius:10px; box-shadow:none; padding:18px 24px; text-align:center; letter-spacing:0.02em;">
+    <!-- Footer -->
+    <footer>
         <p style="margin:0; font-weight:bold; text-shadow:none;">
             Made for <b>Knowledge purposes only</b>.<br>
             Learn more about password security at
-            <a href="https://haveibeenpwned.com/Passwords" target="_blank" style="color:#39ff14;text-decoration:underline;text-shadow:none;">HIBP</a>
+            <a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener noreferrer">HIBP</a>
             and
-            <a href="https://www.owasp.org/index.php/Password_special_characters" target="_blank" style="color:#39ff14;text-decoration:underline;text-shadow:none;">OWASP</a>.
+            <a href="https://www.owasp.org/index.php/Password_special_characters" target="_blank"
+                rel="noopener noreferrer">OWASP</a>.
         </p>
     </footer>
+
+    <!-- Toast Notification -->
+    <div id="copy-toast" class="copy-toast">Copied!</div>
+
+    <!-- External Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+    <script src="{% static 'pwdchecker/main.js' %}"></script>
+
+    <!-- Initialize page-specific features -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Initialize HIBP polling if token exists
+            var hibpToken = '{{ hibp_token|default:""|escapejs }}';
+            if (hibpToken) {
+                initHibpPolling(hibpToken, "{% url 'pwdchecker:hibp_status' %}");
+            }
+
+            // Initialize dark web scan animation if results exist
+            {% if results %}
+            var hibpCount = parseInt("{{ results.hibp_count|default_if_none:0 }}", 10);
+            if (isNaN(hibpCount)) hibpCount = 0;
+            initDarkwebScan(hibpCount);
+            {% endif %}
+        });
+    </script>
 </body>
+
 </html>

@@ -1,0 +1,448 @@
+/* ==========================================================================
+   Password Analyzer - Main Stylesheet
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Base Styles & Variables
+   ========================================================================== */
+:root {
+    --color-primary: #39ff14;
+    --color-secondary: #00fff7;
+    --color-danger: #ff3333;
+    --color-warning: #ffcc00;
+    --color-bg-dark: #181818;
+    --color-bg-gradient-start: #0f2027;
+    --color-bg-gradient-end: #2c5364;
+    --font-mono: 'Share Tech Mono', 'Fira Mono', 'Consolas', monospace;
+    --border-radius: 6px;
+    --transition-speed: 0.2s;
+}
+
+/* ==========================================================================
+   2. Global Styles
+   ========================================================================== */
+body {
+    background: linear-gradient(135deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    padding: 4vw;
+    min-height: 100vh;
+    letter-spacing: 0.03em;
+    margin: 0;
+}
+
+::selection {
+    background: #00fff799;
+    color: #111;
+}
+
+/* Ensure all result text is selectable on all devices */
+body, .result-box, .error, .strong {
+    -webkit-user-select: text !important;
+    -moz-user-select: text !important;
+    -ms-user-select: text !important;
+    user-select: text !important;
+}
+
+/* ==========================================================================
+   3. Typography
+   ========================================================================== */
+h1 {
+    font-size: 2.5em;
+    text-align: center;
+    margin-bottom: 1.5em;
+}
+
+a, a:visited {
+    color: var(--color-secondary);
+    text-decoration: underline;
+}
+
+label, input, button, select {
+    font-size: 1em;
+}
+
+/* ==========================================================================
+   4. Terminal Container
+   ========================================================================== */
+.terminal {
+    background: rgba(24, 24, 24, 0.98);
+    border-radius: 8px;
+    box-shadow: 0 0 30px #00ffcc33, 0 0 3px var(--color-primary);
+    padding: 5vw 4vw;
+    margin-top: 5vw;
+    font-size: 1.1em;
+    min-height: 180px;
+    border: 1.5px solid var(--color-primary);
+    text-shadow: 0 0 2px var(--color-primary), 0 0 8px #00ffcc44;
+    position: relative;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    background: var(--color-primary);
+    animation: blink 1s steps(2, start) infinite;
+    margin-left: 2px;
+}
+
+@keyframes blink {
+    to { background: transparent; }
+}
+
+/* ==========================================================================
+   5. Results & Warning Boxes
+   ========================================================================== */
+.results {
+    margin-top: 5vw;
+    padding: 4vw 3vw;
+    border: 1.2px solid var(--color-secondary);
+    border-radius: var(--border-radius);
+    background: rgba(22, 34, 40, 0.92);
+    box-shadow: none;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.warning {
+    max-width: 700px;
+    margin: 0 auto 1.5em auto;
+    font-size: 1.05em;
+    padding: 1.2em 1em;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    border: 1px solid #39ff1455;
+}
+
+/* ==========================================================================
+   6. Forms & Inputs
+   ========================================================================== */
+form {
+    width: 100%;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+input, button, select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+input[type="password"],
+input[type="text"] {
+    width: 100%;
+    padding-right: 2.6em;
+    min-width: 180px;
+    max-width: 320px;
+    box-sizing: border-box;
+    height: 2.3em;
+    line-height: 2.3em;
+    font-size: 1em;
+    border-radius: var(--border-radius);
+    border: 1.2px solid var(--color-primary);
+    background: var(--color-bg-dark);
+    color: var(--color-primary);
+}
+
+ul {
+    margin-left: 1em;
+}
+
+/* ==========================================================================
+   7. Buttons
+   ========================================================================== */
+.form-btn {
+    height: 2.3em;
+    min-width: 90px;
+    font-size: 1em;
+    border-radius: var(--border-radius);
+    border: none;
+    background: var(--color-primary);
+    color: var(--color-bg-dark);
+    font-weight: bold;
+    transition: background var(--transition-speed);
+    box-shadow: 0 0 5px #39ff1455;
+    cursor: pointer;
+}
+
+.form-btn:hover {
+    background: var(--color-secondary);
+    color: var(--color-bg-dark);
+}
+
+.btn, button[type="submit"], button[type="button"] {
+    background: linear-gradient(90deg, var(--color-secondary) 0%, var(--color-primary) 100%);
+    color: #222;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 18px;
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 4px 0;
+    transition: background var(--transition-speed);
+}
+
+.btn:hover, button[type="submit"]:hover, button[type="button"]:hover {
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.form-btn, .btn, button[type="submit"], button[type="button"] {
+    width: auto;
+    min-width: 120px;
+    box-sizing: border-box;
+}
+
+/* ==========================================================================
+   8. File Input
+   ========================================================================== */
+.file-input {
+    display: none;
+}
+
+.file-label {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--color-secondary) 0%, var(--color-primary) 100%);
+    color: #222;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 18px;
+    font-weight: 600;
+    font-size: 1em;
+    cursor: pointer;
+    margin: 4px 0;
+    transition: background var(--transition-speed);
+}
+
+.file-label:hover {
+    background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+}
+
+.filename {
+    font-size: 0.95em;
+    margin-left: 10px;
+    color: var(--color-secondary);
+}
+
+/* ==========================================================================
+   9. Flex Layouts
+   ========================================================================== */
+.flex-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7em;
+}
+
+.form-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5em;
+    max-width: 500px;
+    flex-direction: row;
+}
+
+.form-col {
+    flex: 1;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3em;
+}
+
+.form-btn-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    align-items: flex-start;
+    width: auto;
+}
+
+/* ==========================================================================
+   10. Score Indicators
+   ========================================================================== */
+.score-0, .score-1 { color: var(--color-danger); }
+.score-2 { color: var(--color-warning); }
+.score-3, .score-4 { color: var(--color-primary); }
+
+.breached { color: var(--color-danger); font-weight: bold; }
+.not-breached { color: var(--color-primary); }
+.error { color: var(--color-danger); font-weight: bold; }
+
+/* ==========================================================================
+   11. Dark Web Scan Animation
+   ========================================================================== */
+.darkweb-scan {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 22px 0;
+    font-size: 1.18em;
+    color: var(--color-secondary);
+    font-family: inherit;
+}
+
+.darkweb-spinner {
+    width: 22px;
+    height: 22px;
+    border: 3px solid #222;
+    border-top: 3px solid var(--color-secondary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   12. Breach Indicator
+   ========================================================================== */
+.breach-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 18px 0;
+    padding: 14px 18px;
+    border-radius: 7px;
+    font-size: 1.13em;
+    font-weight: bold;
+}
+
+.breach-indicator.breached {
+    background: rgba(255, 51, 51, 0.18);
+    border: 1.5px solid var(--color-danger);
+    color: var(--color-danger);
+}
+
+.breach-indicator.not-breached {
+    background: rgba(39, 255, 100, 0.13);
+    border: 1.5px solid var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* ==========================================================================
+   13. Footer & Privacy
+   ========================================================================== */
+footer {
+    margin-top: 40px;
+    color: #fff;
+    background: rgba(39, 255, 100, 0.13);
+    font-size: 1.08em;
+    border-radius: 10px;
+    box-shadow: none;
+    padding: 18px 24px;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.privacy {
+    margin: 24px auto 0 auto;
+    max-width: 700px;
+    background: rgba(39, 255, 100, 0.13);
+    color: #fff;
+    border-radius: 10px;
+    padding: 18px 24px;
+    font-size: 1.08em;
+    text-align: center;
+    box-shadow: none;
+    letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   14. Toast Notification
+   ========================================================================== */
+.copy-toast {
+    display: none;
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 1000;
+    background: #222;
+    color: var(--color-primary);
+    padding: 12px 24px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px #39ff1444;
+    font-size: 1.08em;
+    transition: opacity var(--transition-speed);
+    opacity: 0.97;
+}
+
+/* ==========================================================================
+   15. Strength Meter
+   ========================================================================== */
+.strength-meter {
+    height: 8px;
+    width: 100%;
+    background: #222;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 1em;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    background: var(--color-primary);
+    transition: width 0.3s;
+}
+
+/* ==========================================================================
+   16. Responsive Design
+   ========================================================================== */
+@media (max-width: 900px) {
+    h1 {
+        font-size: 2em;
+    }
+    .terminal, .results, .warning, form {
+        max-width: 98vw;
+        padding: 5vw 2vw;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 2vw;
+    }
+    h1 {
+        font-size: 1.4em;
+        margin-bottom: 1em;
+    }
+    .terminal, .results, .warning, form {
+        max-width: 100vw;
+        padding: 4vw 2vw;
+        font-size: 1em;
+    }
+    .flex-row {
+        flex-direction: column;
+        gap: 0.5em;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0.5em;
+        max-width: 100%;
+    }
+    .form-col {
+        max-width: 100%;
+    }
+    .form-btn-col {
+        width: 100%;
+    }
+    .form-btn, .btn, button[type="submit"], button[type="button"] {
+        width: 100%;
+        min-width: 0;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+}

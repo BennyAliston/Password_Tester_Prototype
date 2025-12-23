@@ -1,0 +1,15 @@
+# Flake8 configuration (for tools that don't read pyproject.toml)
+[flake8]
+max-line-length = 120
+extend-ignore = E203, W503
+exclude =
+    .git,
+    __pycache__,
+    migrations,
+    venv,
+    ptvienv,
+    .venv,
+    build,
+    dist
+per-file-ignores =
+    __init__.py:F401

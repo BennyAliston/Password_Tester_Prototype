@@ -177,16 +177,29 @@ def check_password_strength(password, deep=False, custom_dict=None):
     results['brute_force_hours'] = seconds / 3600
     results['brute_force_days'] = seconds / 86400
     results['brute_force_years'] = seconds / 31536000
-    if seconds < 60:
+    # Human-readable label for templates/UX
+    if seconds < 0.01:
+        brute_label = "< 0.01 seconds (Very Weak)"
+        steps.append("> [!] Brute-force time: < 0.01 seconds (Very Weak)")
+    elif seconds < 60:
+        brute_label = f"{seconds:.2f} seconds (Very Weak)"
         steps.append(f"> [!] Brute-force time: {seconds:.2f} seconds (Very Weak)")
     elif seconds < 3600:
+        brute_label = f"{seconds/60:.2f} minutes (Weak)"
         steps.append(f"> [!] Brute-force time: {seconds/60:.2f} minutes (Weak)")
     elif seconds < 86400:
+        brute_label = f"{seconds/3600:.2f} hours"
         steps.append(f"> [*] Brute-force time: {seconds/3600:.2f} hours")
     elif seconds < 31536000:
+        brute_label = f"{seconds/86400:.2f} days"
         steps.append(f"> [*] Brute-force time: {seconds/86400:.2f} days")
+    elif seconds < 31851360:
+        brute_label = "< 1 year"
+        steps.append("> [*] Brute-force time: < 1 year")
     else:
+        brute_label = f"{seconds/31536000:.2f} years"
         steps.append(f"> [*] Brute-force time: {seconds/31536000:.2f} years")
+    results['brute_force_label'] = brute_label
 
     # 6. Check Have I Been Pwned (HIBP) database using k-anonymity with caching
     hibp_count = -1

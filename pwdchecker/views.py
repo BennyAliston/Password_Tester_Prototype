@@ -102,6 +102,16 @@ def index(request):
             cache.set(f"hibp_token:{token}", sha1, 5 * 60)  # token valid for 5 minutes
             context['hibp_token'] = token
             context['results'] = strength_results
+            # Extract crack time display strings early to avoid template fallthrough
+            crack_times = (strength_results.get('zxcvbn_result') or {}).get('crack_times_display') or {}
+            def _fmt(val):
+                return val if val else "N/A"
+            context['crack_times_display'] = {
+                'online_throttling_100_per_hour': _fmt(crack_times.get('online_throttling_100_per_hour')),
+                'online_no_throttling_10_per_second': _fmt(crack_times.get('online_no_throttling_10_per_second')),
+                'offline_slow_hashing_1e4_per_second': _fmt(crack_times.get('offline_slow_hashing_1e4_per_second')),
+                'offline_fast_hashing_1e10_per_second': _fmt(crack_times.get('offline_fast_hashing_1e10_per_second')),
+            }
             # Do NOT keep the raw checked password in session or logs
             context['password_checked'] = '********' if password else ''
             context['hacker_steps'] = strength_results.get('steps', [])
@@ -155,6 +165,7 @@ def index(request):
     # Ensure forms are present in context for template rendering
     context.setdefault('pwd_form', pwd_form)
     context.setdefault('upload_form', upload_form)
+    context.setdefault('crack_times_display', {})
 
     return render(request, 'pwdchecker/index.html', context)
 

@@ -1,0 +1,125 @@
+[project]
+name = "password-tester"
+version = "2.1.0"
+description = "A comprehensive web application for password security analysis, strength testing, and breach checking"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Kritagya Kumar", email = "bennyaliston@example.com"}
+]
+requires-python = ">=3.8"
+keywords = ["password", "security", "breach", "django", "hibp", "zxcvbn"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django :: 5.2",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Security",
+]
+
+[project.urls]
+Homepage = "https://github.com/BennyAliston/Password_Tester_Prototype"
+Repository = "https://github.com/BennyAliston/Password_Tester_Prototype"
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+    # defaults
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | venv
+    | ptvienv
+    | _build
+    | buck-out
+    | build
+    | dist
+    | migrations
+)/
+'''
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "migrations",
+    "venv",
+    "ptvienv",
+    ".venv",
+]
+per-file-ignores = [
+    "__init__.py:F401",
+]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+exclude = [
+    "migrations",
+    "venv",
+    "ptvienv",
+]
+
+[[tool.mypy.overrides]]
+module = "django.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "zxcvbn.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "pwnedpasswords.*"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "password_tester.settings"
+python_files = ["tests*.py", "test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+testpaths = ["pwdchecker"]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["pwdchecker"]
+omit = [
+    "*/migrations/*",
+    "*/tests*.py",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+]
+precision = 2
+show_missing = true
+
+[tool.bandit]
+exclude_dirs = ["tests", "migrations", "venv", "ptvienv"]
+skips = ["B101"]  # Skip assert warnings in tests

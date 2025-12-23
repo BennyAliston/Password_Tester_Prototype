@@ -7,9 +7,13 @@ For more details, refer to the Django documentation: https://docs.djangoproject.
 
 from django.contrib import admin
 from django.urls import path, include
+from pwdchecker import views as pwd_views
 
 # Define the URL patterns for the project
 urlpatterns = [
     path('admin/', admin.site.urls),  # Admin interface
-    path('', include('pwdchecker.urls')),  # Include URLs from the pwdchecker app
+    # Include URLs from the pwdchecker app with namespace
+    path('', include(('pwdchecker.urls', 'pwdchecker'), namespace='pwdchecker')),
+    # Provide a global alias for tests and external callers
+    path('hibp-status/', pwd_views.hibp_status, name='hibp_status'),
 ]

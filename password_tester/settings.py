@@ -6,33 +6,32 @@ installed apps, middleware, and static file handling.
 For more details, refer to the Django documentation: https://docs.djangoproject.com/en/5.2/topics/settings/
 """
 
+import os
 from pathlib import Path
 
 # Define the base directory of the project
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security settings
-# IMPORTANT: Replace SECRET_KEY with an environment variable in production
-SECRET_KEY = 'django-insecure-f*3)u^(3&&z+f(-)sf%kev7(h5)s#nc7+06zg!g*3cm_$n=lof'
+# Uses environment variable in production, falls back to dev key locally
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-f*3)u^(3&&z+f(-)sf%kev7(h5)s#nc7+06zg!g*3cm_$n=lof')
 
-# Debug mode should be turned off in production
-DEBUG = True
+# Debug mode - automatically False in production
+DEBUG = os.environ.get('DEBUG', 'True').lower() == 'true'
 
 # Define the allowed hosts for the application
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-# Production security hardening (toggle as appropriate)
-# Ensure these are set to True in production when using HTTPS
-SESSION_COOKIE_SECURE = False  # set True in production
-CSRF_COOKIE_SECURE = False  # set True in production
-SECURE_HSTS_SECONDS = 0  # set to 31536000 (1 year) in production
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+# Render.com specific: get the external hostname
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Security headers (always enabled)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-# Redirect HTTP to HTTPS in production
-SECURE_SSL_REDIRECT = False
 
-# Session lifetime (seconds). Tune for your app.
+# Session lifetime (seconds)
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 
 # Application definition
@@ -48,6 +47,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',  # Security enhancements
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Serve static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',  # Session management
     'django.middleware.common.CommonMiddleware',  # Common HTTP middleware
     'django.middleware.csrf.CsrfViewMiddleware',  # CSRF protection
@@ -109,13 +109,27 @@ USE_I18N = True
 USE_TZ = True
 
 # Static file settings
-STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CSRF trusted origins
-CSRF_TRUSTED_ORIGINS = [
-    "http://127.0.0.1:51790",
-    "http://localhost:51790",
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    'CSRF_TRUSTED_ORIGINS',
+    'http://127.0.0.1:8000,http://localhost:8000'
+).split(',')
+
+# Add Render hostname to CSRF trusted origins
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
+
+# Production security settings (auto-enabled when DEBUG=False)
+if not DEBUG:
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_SSL_REDIRECT = True   "http://localhost:51790",
 ]

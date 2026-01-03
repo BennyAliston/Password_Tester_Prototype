@@ -4,6 +4,10 @@ zxcvbn>=4.4.4
 pwnedpasswords>=2.0.0
 requests>=2.31.0
 
+# Production server
+gunicorn>=21.0.0
+whitenoise>=6.6.0
+
 # Development / CI tools
 pytest>=8.0.0
 pytest-django>=4.8.0

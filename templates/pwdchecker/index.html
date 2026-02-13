@@ -1,288 +1,566 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <!-- Head section includes metadata, title, and external resources -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Password Breach Analyzer - Check your password strength and breach status">
+    <meta name="description" content="Password Breach Analyzer - Check your password strength, detect breaches, and learn how attackers think.">
     <title>Password Breach Analyzer</title>
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
-    <!-- External Stylesheets -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'pwdchecker/styles.css' %}">
 </head>
-
 <body>
-    <h1>&#128273; Password Analyzer</h1>
 
-    <!-- Warning section for ethical usage -->
-    <div class="warning">
-        <p>⚠️ <b>For educational/ethical use only!</b> Do <u>not</u> test real passwords. This tool demonstrates how
-            attackers analyze passwords and why strong passwords matter.</p>
-    </div>
+    <!-- SVG Sprite -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none;">
+        <symbol id="icon-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+        <symbol id="icon-shield" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol>
+        <symbol id="icon-eye" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></symbol>
+        <symbol id="icon-eye-off" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></symbol>
+        <symbol id="icon-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+        <symbol id="icon-shuffle" viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></symbol>
+        <symbol id="icon-check" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+        <symbol id="icon-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></symbol>
+        <symbol id="icon-zap" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></symbol>
+        <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></symbol>
+        <symbol id="icon-file-text" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+        <symbol id="icon-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></symbol>
+        <symbol id="icon-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
+        <symbol id="icon-activity" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
+        <symbol id="icon-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    </svg>
 
-    <!-- Password Analysis Form -->
-    <form method="post" enctype="multipart/form-data" style="margin-bottom:1.5em;">
-        {% csrf_token %}
-        <label for="password" style="margin-right:8px;">Enter Password:</label>
-        <div class="form-row">
-            <div class="form-col">
-                <input type="password" id="password" name="password" required autofocus aria-label="Enter password">
-                <label style="font-size:0.98em;cursor:pointer;user-select:none;">
-                    <input type="checkbox" id="show_password" onchange="togglePassword('password', this)"
-                        aria-label="Show main password"> Show Password
-                </label>
+    <!-- Navigation -->
+    <nav class="site-nav" id="site-nav" aria-label="Main navigation">
+        <a href="#hero" class="site-nav__brand">PBA</a>
+        <button class="site-nav__hamburger" aria-label="Toggle menu" aria-expanded="false">
+            <svg class="icon"><use href="#icon-menu"/></svg>
+        </button>
+        <ul class="site-nav__links" role="list">
+            <li><a href="#analyzer" class="site-nav__link">Analyzer</a></li>
+            {% if results %}<li><a href="#results" class="site-nav__link">Results</a></li>{% endif %}
+            <li><a href="#how-it-works" class="site-nav__link">How It Works</a></li>
+            <li><a href="#faq" class="site-nav__link">FAQ</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero__content">
+                <h1 class="hero__title">Password <span class="hero__title-accent">Breach</span> Analyzer</h1>
+                <p class="hero__tagline">Analyze password strength, detect breaches, and understand how attackers think.</p>
+                <a href="#analyzer" class="btn btn--primary btn--lg hero__cta">Start Analyzing</a>
+                <div class="hero__badge">
+                    <svg class="icon"><use href="#icon-alert"/></svg>
+                    For educational and ethical use only. Do not test real passwords.
+                </div>
             </div>
-            <div class="form-btn-col">
-                <button type="submit" class="form-btn" aria-label="Analyze password">Analyze</button>
+        </section>
+
+        <!-- Analyzer Section -->
+        <section class="analyzer section" id="analyzer">
+            <div class="container">
+                <h2 class="section__title">Password Analyzer</h2>
+
+                <!-- Generated Password Display -->
+                {% if generated_password %}
+                <div class="generated-password animate-on-scroll">
+                    <span class="generated-password__label">Suggested Password:</span>
+                    <span class="generated-password__value" id="genpw">{{ generated_password }}</span>
+                    <button type="button" class="btn btn--ghost btn--sm" onclick="copyGenerated()" aria-label="Copy generated password">
+                        <svg class="icon"><use href="#icon-copy"/></svg> Copy
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Password Analysis Form wraps both cards -->
+                <form method="post" enctype="multipart/form-data" id="password-form">
+                    {% csrf_token %}
+                    <div class="analyzer__cards">
+                        <!-- Card: Password Input -->
+                        <div class="card card--primary animate-on-scroll">
+                            <div class="card__header">
+                                <svg class="icon card__header-icon"><use href="#icon-lock"/></svg>
+                                Test a Password
+                            </div>
+                            <div class="card__body">
+                                <div class="input-group">
+                                    <label class="input-group__label" for="password">Enter Password</label>
+                                    <div class="input-group__field">
+                                        <input type="password" id="password" name="password" required autofocus
+                                               aria-label="Enter password" placeholder="Type a password to analyze...">
+                                        <button type="button" class="input-group__toggle"
+                                                onclick="togglePasswordVisibility('password', this)"
+                                                aria-label="Toggle password visibility">
+                                            <svg class="icon"><use href="#icon-eye"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="strength-meter">
+                                    <div id="strength-bar" class="strength-bar"></div>
+                                </div>
+                                <div id="strength-feedback" class="strength-meter__label"></div>
+                                <ul id="policy-list" class="policy-list"></ul>
+                                <div id="entropy-display" class="entropy-display"></div>
+                                <div id="breach-warning" class="breach-warning"></div>
+
+                                <button type="submit" class="btn btn--primary btn--lg btn--full">Analyze Password</button>
+                            </div>
+                        </div>
+
+                        <!-- Card: Compare & Generate -->
+                        <div class="card card--secondary animate-on-scroll">
+                            <div class="card__header">
+                                <svg class="icon card__header-icon"><use href="#icon-shuffle"/></svg>
+                                Compare &amp; Generate
+                            </div>
+                            <div class="card__body">
+                                <div class="input-group">
+                                    <label class="input-group__label" for="compare_password">Compare With</label>
+                                    <div class="input-group__field">
+                                        <input type="password" id="compare_password" name="compare_password"
+                                               placeholder="(optional)" aria-label="Compare password">
+                                        <button type="button" class="input-group__toggle"
+                                                onclick="togglePasswordVisibility('compare_password', this)"
+                                                aria-label="Toggle compare password visibility">
+                                            <svg class="icon"><use href="#icon-eye"/></svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="generator-options">
+                                    <div class="generator-options__legend">Password Options</div>
+                                    <div class="generator-options__checks">
+                                        <label class="checkbox-pill">
+                                            <input type="checkbox" id="opt_upper" checked aria-label="Include uppercase"> Uppercase
+                                        </label>
+                                        <label class="checkbox-pill">
+                                            <input type="checkbox" id="opt_lower" checked aria-label="Include lowercase"> Lowercase
+                                        </label>
+                                        <label class="checkbox-pill">
+                                            <input type="checkbox" id="opt_num" checked aria-label="Include numbers"> Numbers
+                                        </label>
+                                        <label class="checkbox-pill">
+                                            <input type="checkbox" id="opt_sym" checked aria-label="Include symbols"> Symbols
+                                        </label>
+                                    </div>
+                                    <div class="range-group">
+                                        <span class="range-group__label">Length</span>
+                                        <input type="range" id="opt_len" min="8" max="32" value="14" aria-label="Password length">
+                                        <span class="range-group__value" id="opt_len_readout">14</span>
+                                    </div>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn--primary" onclick="suggestComparePassword()" aria-label="Suggest password">
+                                        <svg class="icon"><use href="#icon-shuffle"/></svg> Generate
+                                    </button>
+                                    <button type="button" class="btn btn--ghost" onclick="copyToClipboard('compare_password')" aria-label="Copy compare password">
+                                        <svg class="icon"><use href="#icon-copy"/></svg> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Dictionary Upload Form (separate form) -->
+                <form method="post" enctype="multipart/form-data" id="dict-upload-form">
+                    {% csrf_token %}
+                    <div class="card card--compact animate-on-scroll">
+                        <div class="card__header">
+                            <svg class="icon card__header-icon"><use href="#icon-file-text"/></svg>
+                            Custom Dictionary
+                        </div>
+                        <div class="card__body">
+                            <input type="file" id="custom_dict" name="custom_dict" accept=".txt"
+                                   class="file-input" onchange="showFilename(this)" aria-label="Upload custom dictionary">
+                            <label for="custom_dict" class="file-label">
+                                <svg class="icon"><use href="#icon-file-text"/></svg> Choose File
+                            </label>
+                            <span id="filename" class="filename" aria-live="polite"></span>
+                            <div class="btn-group">
+                                <button type="submit" class="btn btn--primary btn--sm">Upload</button>
+                                <button type="submit" name="delete_custom_dict" value="1" class="btn btn--danger btn--sm">Delete Dictionary</button>
+                            </div>
+                            {% if custom_dict_status %}
+                            <div class="dict-status">{{ custom_dict_status }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
             </div>
-        </div>
-        <br><br>
-        <label for="compare_password" style="margin-right:8px;">Compare with:</label>
-        <div class="form-row">
-            <div class="form-col">
-                <input type="password" id="compare_password" name="compare_password" placeholder="(optional)"
-                    aria-label="Compare password">
-                <label style="font-size:0.98em;cursor:pointer;user-select:none;margin-top:0.2em;">
-                    <input type="checkbox" id="show_compare_password"
-                        onchange="togglePassword('compare_password', this)" aria-label="Show compare password"> Show
-                    Password
-                </label>
-                <div style="margin-top:0.6em;display:flex;flex-direction:column;gap:0.4em;">
-                    <label style="font-size:0.96em;">Password Options:</label>
-                    <div style="display:flex;align-items:center;gap:1em;flex-wrap:wrap;">
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_upper" checked
-                                aria-label="Include uppercase letters"> Uppercase</label>
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_lower" checked
-                                aria-label="Include lowercase letters"> Lowercase</label>
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_num" checked
-                                aria-label="Include numbers"> Numbers</label>
-                        <label style="font-size:0.95em;"><input type="checkbox" id="opt_sym" checked
-                                aria-label="Include symbols"> Symbols</label>
-                        <label style="font-size:0.95em;">Length: <input type="number" id="opt_len" min="8" max="32"
-                                value="14" style="width:3em;" aria-label="Password length"></label>
+        </section>
+
+        <!-- Results Section (conditional) -->
+        {% if results %}
+        <section class="results-section section" id="results">
+            <div class="container">
+                <h2 class="section__title">Analysis Results</h2>
+
+                {% if results.error %}
+                <div class="result-card result-card--deep animate-on-scroll" style="margin-bottom:var(--space-xl);">
+                    <div class="result-card__header">
+                        <svg class="icon"><use href="#icon-alert"/></svg> Error
+                    </div>
+                    <div class="result-card__body">
+                        <p class="error">{{ results.error }}</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="results-grid">
+
+                    <!-- Dark Web Scan -->
+                    <div class="result-card result-card--scan animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-globe"/></svg> Dark Web Scan
+                        </div>
+                        <div class="result-card__body">
+                            <div id="darkwebScanContainer"></div>
+                            <div id="breachIndicatorContainer" style="display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Password Policy -->
+                    {% if policy_results %}
+                    <div class="result-card result-card--policy animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-check-circle"/></svg> Password Policy
+                        </div>
+                        <div class="result-card__body">
+                            {% for desc, ok in policy_results %}
+                            <div class="policy-item {% if ok %}policy-item--pass{% else %}policy-item--fail{% endif %}">
+                                <svg class="icon"><use href="{% if ok %}#icon-check{% else %}#icon-x{% endif %}"/></svg>
+                                <span>{{ desc }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Basic Checks -->
+                    {% if basic_feedback %}
+                    <div class="result-card result-card--basic animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-alert"/></svg> Basic Checks
+                        </div>
+                        <div class="result-card__body">
+                            <ul>
+                                {% for item in basic_feedback %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Advanced Insights -->
+                    {% if advanced_feedback %}
+                    <div class="result-card result-card--advanced animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-zap"/></svg> Advanced Insights
+                        </div>
+                        <div class="result-card__body">
+                            <ul>
+                                {% for item in advanced_feedback %}
+                                <li>{{ item }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Deep Security Checks -->
+                    {% if results.extra_checks %}
+                    <div class="result-card result-card--deep animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-shield"/></svg> Deep Security Checks
+                        </div>
+                        <div class="result-card__body">
+                            <ul>
+                                {% for msg in results.extra_checks %}
+                                <li>{{ msg }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Comparison -->
+                    {% if compare %}
+                    <div class="result-card result-card--compare animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-activity"/></svg> Comparison
+                        </div>
+                        <div class="result-card__body">
+                            <ul>
+                                <li><b>First password:</b> Score {{ results.zxcvbn_result.score }} / 4</li>
+                                <li><b>Second password:</b> Score {{ compare.results.zxcvbn_result.score }} / 4</li>
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Strength Analysis (full width) -->
+                    {% if results.zxcvbn_result %}
+                    <div class="result-card result-card--strength animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-activity"/></svg> Strength Analysis
+                        </div>
+                        <div class="result-card__body">
+                            <div class="strength-content">
+                                <div class="strength-score">
+                                    <div class="score-badge score-badge--{{ results.zxcvbn_result.score }}" data-score="{{ results.zxcvbn_result.score }}">
+                                        <svg class="score-badge__ring" viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="45" class="score-badge__track"/>
+                                            <circle cx="50" cy="50" r="45" class="score-badge__fill"
+                                                    style="stroke-dasharray: 283; stroke-dashoffset: 283;"/>
+                                        </svg>
+                                        <span class="score-badge__value">{{ results.zxcvbn_result.score }}</span>
+                                        <span class="score-badge__label">/ 4</span>
+                                    </div>
+                                    <div class="strength-score__label score-{{ results.zxcvbn_result.score }}">
+                                        {% if results.zxcvbn_result.score == 0 %}Very Weak
+                                        {% elif results.zxcvbn_result.score == 1 %}Weak
+                                        {% elif results.zxcvbn_result.score == 2 %}Fair
+                                        {% elif results.zxcvbn_result.score == 3 %}Good
+                                        {% elif results.zxcvbn_result.score == 4 %}Strong
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="strength-details">
+                                    {% if results.zxcvbn_result.feedback.warning %}
+                                    <h4 style="color:var(--color-warning);">Warning</h4>
+                                    <p style="color:var(--color-warning);">{{ results.zxcvbn_result.feedback.warning }}</p>
+                                    {% endif %}
+                                    {% if results.zxcvbn_result.feedback.suggestions %}
+                                    <h4>Suggestions</h4>
+                                    <ul>
+                                        {% for s in results.zxcvbn_result.feedback.suggestions %}
+                                        <li>{{ s }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% if crack_times_display %}
+                            <div class="crack-times">
+                                <div class="crack-time-item">
+                                    <span class="crack-time-item__label">Online (Throttled)</span>
+                                    <span class="crack-time-item__value">{{ crack_times_display.online_throttling_100_per_hour }}</span>
+                                </div>
+                                <div class="crack-time-item">
+                                    <span class="crack-time-item__label">Offline (Slow Hash)</span>
+                                    <span class="crack-time-item__value">{{ crack_times_display.offline_slow_hashing_1e4_per_second }}</span>
+                                </div>
+                                <div class="crack-time-item">
+                                    <span class="crack-time-item__label">Offline (Fast Hash)</span>
+                                    <span class="crack-time-item__value">{{ crack_times_display.offline_fast_hashing_1e10_per_second }}</span>
+                                </div>
+                                <div class="crack-time-item">
+                                    <span class="crack-time-item__label">Brute Force (1B/s)</span>
+                                    <span class="crack-time-item__value">{{ results.brute_force_label|default:"N/A" }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Analysis Report (full width) -->
+                    <div class="result-card result-card--report animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-file-text"/></svg> Analysis Report
+                        </div>
+                        <div class="result-card__body">
+                            <div class="report-items">
+                                <div class="report-item">
+                                    <svg class="icon"><use href="#icon-zap"/></svg>
+                                    <div class="report-item__content">
+                                        <span class="report-item__label">Entropy</span>
+                                        <span class="report-item__value">{{ results.entropy|default:"N/A" }} bits</span>
+                                    </div>
+                                </div>
+                                <div class="report-item">
+                                    <svg class="icon"><use href="#icon-key"/></svg>
+                                    <div class="report-item__content">
+                                        <span class="report-item__label">Keyboard Patterns</span>
+                                        {% if results.keyboard_patterns %}
+                                        <span class="report-item__value report-item__value--danger">{{ results.keyboard_patterns|join:", " }}</span>
+                                        {% else %}
+                                        <span class="report-item__value report-item__value--success">None detected</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="report-item">
+                                    <svg class="icon"><use href="#icon-shuffle"/></svg>
+                                    <div class="report-item__content">
+                                        <span class="report-item__label">Leet / Dictionary</span>
+                                        {% if results.leet_matches %}
+                                        <span class="report-item__value report-item__value--danger">{{ results.leet_matches|join:", " }}</span>
+                                        {% else %}
+                                        <span class="report-item__value report-item__value--success">None detected</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="report-item">
+                                    <svg class="icon"><use href="#icon-shield"/></svg>
+                                    <div class="report-item__content">
+                                        <span class="report-item__label">HIBP Breaches</span>
+                                        {% if results.hibp_count > 0 %}
+                                        <span class="report-item__value report-item__value--danger">Found in {{ results.hibp_count }} breaches</span>
+                                        {% elif results.hibp_count == 0 %}
+                                        <span class="report-item__value report-item__value--success">Not found in breaches</span>
+                                        {% else %}
+                                        <span class="report-item__value">Unknown (pending or error)</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Hacker Terminal -->
+                {% if hacker_steps %}
+                {{ hacker_steps|json_script:"hackerSteps" }}
+                <div class="terminal-section animate-on-scroll">
+                    <h3 class="terminal-section__title">Attack Simulation Log</h3>
+                    <div class="terminal">
+                        <div class="terminal__header">
+                            <span class="terminal__dot terminal__dot--red"></span>
+                            <span class="terminal__dot terminal__dot--yellow"></span>
+                            <span class="terminal__dot terminal__dot--green"></span>
+                        </div>
+                        <pre id="terminal-output"></pre><span class="cursor"></span>
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- How It Works Section -->
+        <section class="how-it-works section" id="how-it-works">
+            <div class="container">
+                <h2 class="section__title">How It Works</h2>
+                <div class="how-it-works__steps">
+                    <div class="step-card animate-on-scroll">
+                        <div class="step-card__number">1</div>
+                        <svg class="icon step-card__icon"><use href="#icon-key"/></svg>
+                        <div class="step-card__title">Enter Password</div>
+                        <p class="step-card__desc">Type any password into the analyzer. Nothing is stored or logged on our servers.</p>
+                    </div>
+                    <div class="step-card animate-on-scroll">
+                        <div class="step-card__number">2</div>
+                        <svg class="icon step-card__icon"><use href="#icon-shield"/></svg>
+                        <div class="step-card__title">Multi-Layer Analysis</div>
+                        <p class="step-card__desc">We check entropy, patterns, dictionary matches, keyboard walks, and zxcvbn scoring.</p>
+                    </div>
+                    <div class="step-card animate-on-scroll">
+                        <div class="step-card__number">3</div>
+                        <svg class="icon step-card__icon"><use href="#icon-globe"/></svg>
+                        <div class="step-card__title">Dark Web Scan</div>
+                        <p class="step-card__desc">Using HIBP's k-anonymity API, we check if the password appears in known breaches without exposing it.</p>
+                    </div>
+                    <div class="step-card animate-on-scroll">
+                        <div class="step-card__number">4</div>
+                        <svg class="icon step-card__icon"><use href="#icon-check-circle"/></svg>
+                        <div class="step-card__title">Get Results</div>
+                        <p class="step-card__desc">Receive a detailed breakdown with actionable suggestions to improve your password security.</p>
                     </div>
                 </div>
             </div>
-            <div class="form-btn-col">
-                <button type="button" class="form-btn" onclick="copyToClipboard('compare_password')"
-                    aria-label="Copy compare password">Copy</button>
-                <button type="button" class="form-btn" onclick="suggestComparePassword()"
-                    aria-label="Suggest password">Suggest Password</button>
+        </section>
+
+        <!-- FAQ Section -->
+        <section class="faq section" id="faq">
+            <div class="container">
+                <h2 class="section__title">Frequently Asked Questions</h2>
+                <div class="faq__list">
+                    <details class="faq__item animate-on-scroll">
+                        <summary>Is my password stored or logged?</summary>
+                        <div class="faq__answer">
+                            No. This tool does not store, save, or log any passwords you enter. All password analysis is performed in-memory and is never retained or shared. Password hashes are stored temporarily in your session for reuse detection only and are cleared when the session expires. For your safety, do not use real or sensitive passwords.
+                        </div>
+                    </details>
+                    <details class="faq__item animate-on-scroll">
+                        <summary>What is zxcvbn?</summary>
+                        <div class="faq__answer">
+                            zxcvbn is an open-source password strength estimator developed by Dropbox. Unlike simple rules (length + special characters), it uses pattern matching and common password databases to provide realistic strength scores from 0 (very weak) to 4 (strong), along with crack time estimates and actionable feedback.
+                        </div>
+                    </details>
+                    <details class="faq__item animate-on-scroll">
+                        <summary>What does the HIBP check do?</summary>
+                        <div class="faq__answer">
+                            The Have I Been Pwned (HIBP) check uses a k-anonymity model to safely determine if your password has appeared in known data breaches. Only the first 5 characters of the password's SHA-1 hash are sent to the API, meaning your full password is never transmitted. Learn more at <a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener noreferrer">haveibeenpwned.com</a>.
+                        </div>
+                    </details>
+                    <details class="faq__item animate-on-scroll">
+                        <summary>What makes a strong password?</summary>
+                        <div class="faq__answer">
+                            A strong password is long (12+ characters), uses a mix of uppercase, lowercase, numbers, and symbols, avoids dictionary words and common patterns (keyboard walks, sequential characters, dates), and is unique to each account. Consider using a passphrase or a password manager for the best security.
+                        </div>
+                    </details>
+                    <details class="faq__item animate-on-scroll">
+                        <summary>Can I use this with my own word list?</summary>
+                        <div class="faq__answer">
+                            Yes. You can upload a custom dictionary of disallowed words or phrases using the Custom Dictionary card in the Analyzer section. Upload a plain text file (.txt, max 2MB) with one word per line. The analyzer will flag any password that contains words from your custom list.
+                        </div>
+                    </details>
+                    <details class="faq__item animate-on-scroll">
+                        <summary>Is this tool suitable for production security audits?</summary>
+                        <div class="faq__answer">
+                            This tool is designed for educational purposes and password awareness training. While it uses industry-standard techniques (zxcvbn, HIBP k-anonymity, entropy analysis), production security audits should use dedicated enterprise tools with proper access controls, audit logging, and compliance frameworks. Learn more about password security best practices at <a href="https://www.owasp.org/index.php/Password_special_characters" target="_blank" rel="noopener noreferrer">OWASP</a>.
+                        </div>
+                    </details>
+                </div>
             </div>
-        </div>
-    </form>
-
-    <!-- Custom Dictionary Upload Form -->
-    <form method="post" enctype="multipart/form-data" style="margin-bottom:1.5em;" id="dict-upload-form">
-        {% csrf_token %}
-        <label for="custom_dict">Upload Custom Disallowed Words/Phrases (.txt):</label>
-        <input type="file" id="custom_dict" name="custom_dict" accept=".txt" class="file-input"
-            onchange="showFilename(this)" aria-label="Upload custom dictionary">
-        <label for="custom_dict" class="file-label">Choose File</label>
-        <span id="filename" class="filename" aria-live="polite"></span>
-        <button type="submit" class="form-btn" style="margin-top:0.8em;">Upload Dictionary</button>
-        <button type="submit" name="delete_custom_dict" value="1" class="form-btn"
-            style="background:#ff3333;color:#fff;margin-top:0.8em;">Delete Custom Dictionary</button>
-        {% if custom_dict_status %}
-        <div class="results" style="margin-top:1em;">{{ custom_dict_status }}</div>
-        {% endif %}
-    </form>
-
-    <!-- Generated Password Display -->
-    {% if generated_password %}
-    <div class="results" style="margin-top:10px;">
-        <b>Suggested Strong Password:</b>
-        <span id="genpw">{{ generated_password }}</span>
-        <button type="button" onclick="copyGenerated()">Copy</button>
-    </div>
-    {% endif %}
-
-    <!-- Strength Meter -->
-    <div class="strength-meter">
-        <div id="strength-bar" class="strength-bar"></div>
-    </div>
-    <div id="strength-feedback" style="margin-bottom:1em;font-size:1em;"></div>
-    <ul id="policy-list" style="margin-bottom:1em;font-size:0.98em;"></ul>
-    <div id="entropy-display" style="margin-bottom:1em;font-size:0.98em;"></div>
-    <div id="breach-warning" style="margin-bottom:1em;font-size:1em;color:#ff3333;"></div>
-
-    <!-- Password Comparison Results -->
-    {% if compare %}
-    <div class="results" style="margin-bottom:1em;">
-        <b>Comparison:</b>
-        <ul>
-            <li>First: {{ password_checked|slice:":3" }}... — Score: {{ results.zxcvbn_result.score }}</li>
-            <li>Second: {{ compare.pw|slice:":3" }}... — Score: {{ compare.results.zxcvbn_result.score }}</li>
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- Password Policy Results -->
-    {% if policy_results %}
-    <div class="results" style="margin-bottom:1em;">
-        <b>Password Policy:</b>
-        <ul>
-            {% for desc, ok in policy_results %}
-            <li>{% if ok %}✅{% else %}❌{% endif %} {{ desc }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- Deep Security Checks -->
-    {% if results.extra_checks %}
-    <div class="results" style="margin-bottom:1em;">
-        <b>Deep Security Checks:</b>
-        <ul>
-            {% for msg in results.extra_checks %}
-            <li>⚠️ {{ msg }}</li>
-            {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- Hacker Steps Terminal Display -->
-    {% if hacker_steps %}
-    {{ hacker_steps|json_script:"hackerSteps" }}
-    <div class="terminal" id="hacker-log">
-        <pre id="terminal-output"></pre><span class="cursor"></span>
-    </div>
-    {% endif %}
-
-    <!-- Main Results -->
-    {% if results %}
-    <div class="results">
-        <h2>Results for: <span style="color:#fff">{{ password_checked|slice:":3" }}...</span></h2>
-        {% if results.error %}
-        <p class="error">An error occurred: {{ results.error }}</p>
-        {% endif %}
-
-        <!-- Dark Web Scan Animation Container -->
-        <div id="darkwebScanContainer"></div>
-        <div id="breachIndicatorContainer" style="display:none;"></div>
-
-        {% if basic_feedback %}
-        <div class="results" style="border-color:#ffcc00;">
-            <h3>Basic Checks</h3>
-            <ul>
-                {% for item in basic_feedback %}
-                <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-            {% if basic_feedback|length == 0 %}
-            <span style="color:#39ff14;">All basic password requirements are met!</span>
-            {% endif %}
-        </div>
-        {% endif %}
-
-        {% if advanced_feedback %}
-        <div class="results" style="border-color:#00fff7;">
-            <h3>Advanced Insights</h3>
-            <ul>
-                {% for item in advanced_feedback %}
-                <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-
-        {% if results.zxcvbn_result %}
-        <h3>Strength Analysis (zxcvbn):</h3>
-        <p><strong>Score:</strong> <span class="score-{{ results.zxcvbn_result.score }}">
-                {{ results.zxcvbn_result.score }} / 4
-                {% if results.zxcvbn_result.score == 0 %} (Very Weak)
-                {% elif results.zxcvbn_result.score == 1 %} (Weak)
-                {% elif results.zxcvbn_result.score == 2 %} (Fair)
-                {% elif results.zxcvbn_result.score == 3 %} (Good)
-                {% elif results.zxcvbn_result.score == 4 %} (Strong)
-                {% endif %}
-            </span></p>
-        {% if crack_times_display %}
-        <p><strong>Estimated time to crack (online, fast hashing):</strong>
-            {{ crack_times_display.online_throttling_100_per_hour }}</p>
-        <p><strong>Estimated time to crack (offline, slow hashing):</strong>
-            {{ crack_times_display.offline_slow_hashing_1e4_per_second }}</p>
-        <p><strong>Estimated time to crack (offline, fast hashing):</strong>
-            {{ crack_times_display.offline_fast_hashing_1e10_per_second }}</p>
-        {% endif %}
-        {% if results.zxcvbn_result.feedback.warning %}
-        <p><strong>Warning:</strong> <span style="color: #ffcc00;">{{ results.zxcvbn_result.feedback.warning }}</span>
-        </p>
-        {% endif %}
-        {% if results.zxcvbn_result.feedback.suggestions %}
-        <p><strong>Suggestions:</strong></p>
-        <ul>
-            {% for s in results.zxcvbn_result.feedback.suggestions %}
-            <li>{{ s }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
-        {% endif %}
-
-        <h3>Analysis Report:</h3>
-        <ul>
-            <li><b>Entropy:</b> {{ results.entropy|default:"N/A" }} bits</li>
-            <li><b>Keyboard Patterns:</b>
-                {% if results.keyboard_patterns %}
-                <span class="error">{{ results.keyboard_patterns|join:", " }}</span>
-                {% else %}
-                None detected
-                {% endif %}
-            </li>
-            <li><b>Leet/Dictionary Matches:</b>
-                {% if results.leet_matches %}
-                <span class="error">{{ results.leet_matches|join:", " }}</span>
-                {% else %}
-                None detected
-                {% endif %}
-            </li>
-            <li><b>Brute-force time (1B/sec):</b> {{ results.brute_force_label|default:"N/A" }}</li>
-            <li><b>HIBP Breach Count:</b>
-                {% if results.hibp_count > 0 %}
-                <span class="breached">Found in {{ results.hibp_count }} breaches!</span>
-                {% elif results.hibp_count == 0 %}
-                <span class="not-breached">Not found in breaches</span>
-                {% else %}
-                Unknown (network error?)
-                {% endif %}
-            </li>
-        </ul>
-    </div>
-    {% endif %}
-
-    <!-- Privacy Statement -->
-    <div class="privacy">
-        <b>Privacy Statement:</b> This tool does <u>not</u> store, save, or log any passwords you enter. All password
-        analysis is performed in-memory and is never retained or shared. For your safety, do not use real or sensitive
-        passwords.
-    </div>
+        </section>
+    </main>
 
     <!-- Footer -->
-    <footer>
-        <p style="margin:0; font-weight:bold; text-shadow:none;">
-            Made for <b>Knowledge purposes only</b>.<br>
-            Learn more about password security at
-            <a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener noreferrer">HIBP</a>
-            and
-            <a href="https://www.owasp.org/index.php/Password_special_characters" target="_blank"
-                rel="noopener noreferrer">OWASP</a>.
-        </p>
+    <footer class="site-footer" id="footer">
+        <div class="container">
+            <div class="site-footer__grid">
+                <div class="site-footer__col">
+                    <h3 class="site-footer__heading">About</h3>
+                    <p class="site-footer__text">Password Breach Analyzer is an educational tool that demonstrates how attackers analyze passwords and why strong, unique passwords matter. Built with Django, zxcvbn, and the Have I Been Pwned API.</p>
+                </div>
+                <div class="site-footer__col">
+                    <h3 class="site-footer__heading">Resources</h3>
+                    <div class="site-footer__links">
+                        <a href="https://haveibeenpwned.com/Passwords" target="_blank" rel="noopener noreferrer" class="site-footer__link">Have I Been Pwned</a>
+                        <a href="https://www.owasp.org/index.php/Password_special_characters" target="_blank" rel="noopener noreferrer" class="site-footer__link">OWASP Password Guide</a>
+                        <a href="https://github.com/dropbox/zxcvbn" target="_blank" rel="noopener noreferrer" class="site-footer__link">zxcvbn on GitHub</a>
+                    </div>
+                </div>
+                <div class="site-footer__col">
+                    <h3 class="site-footer__heading">Legal</h3>
+                    <p class="site-footer__text">For educational and ethical use only. This tool does not store, save, or log any passwords. Do not use real or sensitive passwords.</p>
+                </div>
+            </div>
+            <div class="site-footer__bottom">
+                Made for knowledge purposes only. MIT License.
+            </div>
+        </div>
     </footer>
 
     <!-- Toast Notification -->
-    <div id="copy-toast" class="copy-toast">Copied!</div>
+    <div id="copy-toast" class="toast" role="alert" aria-live="polite">Copied to clipboard!</div>
 
-    <!-- External Scripts -->
+    <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
     <script src="{% static 'pwdchecker/main.js' %}"></script>
-
-    <!-- Initialize page-specific features -->
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // Initialize HIBP polling if token exists
@@ -290,7 +568,6 @@
             if (hibpToken) {
                 initHibpPolling(hibpToken, "{% url 'pwdchecker:hibp_status' %}");
             }
-
             // Initialize dark web scan animation if results exist
             {% if results %}
             var hibpCount = parseInt("{{ results.hibp_count|default_if_none:0 }}", 10);
@@ -300,5 +577,4 @@
         });
     </script>
 </body>
-
 </html>

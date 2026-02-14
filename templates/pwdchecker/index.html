@@ -32,6 +32,10 @@
         <symbol id="icon-key" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></symbol>
         <symbol id="icon-activity" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></symbol>
         <symbol id="icon-check-circle" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+        <symbol id="icon-bar-chart" viewBox="0 0 24 24"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></symbol>
+        <symbol id="icon-hash" viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></symbol>
+        <symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+        <symbol id="icon-percent" viewBox="0 0 24 24"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></symbol>
     </svg>
 
     <!-- Navigation -->
@@ -293,7 +297,81 @@
                     </div>
                     {% endif %}
 
-                    <!-- Comparison -->
+                    <!-- Password Composition Chart -->
+                    {% if results.composition %}
+                    <div class="result-card result-card--composition animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-bar-chart"/></svg> Password Composition
+                        </div>
+                        <div class="result-card__body">
+                            <div class="composition-chart">
+                                <div class="composition-bar">
+                                    {% if results.composition.uppercase_pct > 0 %}
+                                    <div class="composition-bar__segment composition-bar__segment--upper" style="width:{{ results.composition.uppercase_pct }}%;" title="Uppercase: {{ results.composition.uppercase_pct|floatformat:0 }}%"></div>
+                                    {% endif %}
+                                    {% if results.composition.lowercase_pct > 0 %}
+                                    <div class="composition-bar__segment composition-bar__segment--lower" style="width:{{ results.composition.lowercase_pct }}%;" title="Lowercase: {{ results.composition.lowercase_pct|floatformat:0 }}%"></div>
+                                    {% endif %}
+                                    {% if results.composition.digits_pct > 0 %}
+                                    <div class="composition-bar__segment composition-bar__segment--digit" style="width:{{ results.composition.digits_pct }}%;" title="Digits: {{ results.composition.digits_pct|floatformat:0 }}%"></div>
+                                    {% endif %}
+                                    {% if results.composition.symbols_pct > 0 %}
+                                    <div class="composition-bar__segment composition-bar__segment--symbol" style="width:{{ results.composition.symbols_pct }}%;" title="Symbols: {{ results.composition.symbols_pct|floatformat:0 }}%"></div>
+                                    {% endif %}
+                                </div>
+                                <div class="composition-legend">
+                                    <div class="composition-legend__item">
+                                        <span class="composition-legend__swatch composition-legend__swatch--upper"></span>
+                                        <span>Uppercase</span>
+                                        <span class="composition-legend__value">{{ results.composition.uppercase }} ({{ results.composition.uppercase_pct|floatformat:0 }}%)</span>
+                                    </div>
+                                    <div class="composition-legend__item">
+                                        <span class="composition-legend__swatch composition-legend__swatch--lower"></span>
+                                        <span>Lowercase</span>
+                                        <span class="composition-legend__value">{{ results.composition.lowercase }} ({{ results.composition.lowercase_pct|floatformat:0 }}%)</span>
+                                    </div>
+                                    <div class="composition-legend__item">
+                                        <span class="composition-legend__swatch composition-legend__swatch--digit"></span>
+                                        <span>Digits</span>
+                                        <span class="composition-legend__value">{{ results.composition.digits }} ({{ results.composition.digits_pct|floatformat:0 }}%)</span>
+                                    </div>
+                                    <div class="composition-legend__item">
+                                        <span class="composition-legend__swatch composition-legend__swatch--symbol"></span>
+                                        <span>Symbols</span>
+                                        <span class="composition-legend__value">{{ results.composition.symbols }} ({{ results.composition.symbols_pct|floatformat:0 }}%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Password Mask Display -->
+                    {% if results.mask %}
+                    <div class="result-card result-card--mask animate-on-scroll">
+                        <div class="result-card__header">
+                            <svg class="icon"><use href="#icon-hash"/></svg> Password Mask
+                        </div>
+                        <div class="result-card__body">
+                            <div class="mask-display">
+                                <div class="mask-display__pattern">
+                                    {% for char in results.mask %}
+                                    <span class="mask-char mask-char--{% if char == 'U' %}upper{% elif char == 'l' %}lower{% elif char == 'd' %}digit{% else %}symbol{% endif %}">{{ char }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="mask-display__legend">
+                                    <span class="mask-legend-item"><span class="mask-char mask-char--upper">U</span> = Uppercase</span>
+                                    <span class="mask-legend-item"><span class="mask-char mask-char--lower">l</span> = Lowercase</span>
+                                    <span class="mask-legend-item"><span class="mask-char mask-char--digit">d</span> = Digit</span>
+                                    <span class="mask-legend-item"><span class="mask-char mask-char--symbol">s</span> = Symbol</span>
+                                </div>
+                                <p class="mask-display__info">Attackers use mask attacks to exploit predictable patterns like "Capital + word + numbers." Varied, unpredictable patterns are harder to crack.</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Comparison with Similarity Score -->
                     {% if compare %}
                     <div class="result-card result-card--compare animate-on-scroll">
                         <div class="result-card__header">
@@ -304,6 +382,33 @@
                                 <li><b>First password:</b> Score {{ results.zxcvbn_result.score }} / 4</li>
                                 <li><b>Second password:</b> Score {{ compare.results.zxcvbn_result.score }} / 4</li>
                             </ul>
+                            {% if compare.similarity %}
+                            <div class="similarity-section">
+                                <h4 class="similarity-section__title">
+                                    <svg class="icon"><use href="#icon-percent"/></svg> Similarity Score
+                                </h4>
+                                <div class="similarity-meter">
+                                    <div class="similarity-meter__bar">
+                                        <div class="similarity-meter__fill {% if compare.similarity.too_similar %}similarity-meter__fill--danger{% else %}similarity-meter__fill--safe{% endif %}" style="width:{{ compare.similarity.similarity_pct }}%;"></div>
+                                    </div>
+                                    <span class="similarity-meter__pct {% if compare.similarity.too_similar %}similarity-meter__pct--danger{% else %}similarity-meter__pct--safe{% endif %}">{{ compare.similarity.similarity_pct }}%</span>
+                                </div>
+                                <div class="similarity-details">
+                                    <div class="similarity-detail">
+                                        <span class="similarity-detail__label">Edit Distance</span>
+                                        <span class="similarity-detail__value">{{ compare.similarity.levenshtein_distance }} changes</span>
+                                    </div>
+                                    <div class="similarity-detail">
+                                        <span class="similarity-detail__label">Common Substring</span>
+                                        <span class="similarity-detail__value">{{ compare.similarity.lcs_length }} chars ({{ compare.similarity.lcs_pct }}%)</span>
+                                    </div>
+                                </div>
+                                <div class="similarity-verdict {% if compare.similarity.too_similar %}similarity-verdict--danger{% else %}similarity-verdict--safe{% endif %}">
+                                    <svg class="icon"><use href="{% if compare.similarity.too_similar %}#icon-alert{% else %}#icon-check-circle{% endif %}"/></svg>
+                                    {{ compare.similarity.verdict }}
+                                </div>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     {% endif %}
@@ -367,6 +472,57 @@
                                 <div class="crack-time-item">
                                     <span class="crack-time-item__label">Brute Force (1B/s)</span>
                                     <span class="crack-time-item__value">{{ results.brute_force_label|default:"N/A" }}</span>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Attack Scenario Breakdown -->
+                            {% if results.attack_scenarios %}
+                            <div class="attack-scenarios">
+                                <h4 class="attack-scenarios__title">
+                                    <svg class="icon"><use href="#icon-target"/></svg> Attack Scenario Breakdown
+                                </h4>
+                                <div class="attack-scenarios__grid">
+                                    {% for scenario in results.attack_scenarios %}
+                                    <div class="attack-scenario">
+                                        <div class="attack-scenario__header">
+                                            <svg class="icon"><use href="#icon-{{ scenario.icon }}"/></svg>
+                                            <span class="attack-scenario__name">{{ scenario.name }}</span>
+                                        </div>
+                                        <div class="attack-scenario__time">{{ scenario.time }}</div>
+                                        <div class="attack-scenario__speed">{{ scenario.speed }}</div>
+                                        <p class="attack-scenario__desc">{{ scenario.description }}</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Entropy Comparison Scale -->
+                            {% if results.entropy_benchmark %}
+                            <div class="entropy-scale">
+                                <h4 class="entropy-scale__title">
+                                    <svg class="icon"><use href="#icon-zap"/></svg> Entropy Scale — {{ results.entropy|default:"0" }} bits
+                                    <span class="entropy-scale__badge entropy-scale__badge--{{ results.entropy_benchmark.css_class }}">{{ results.entropy_benchmark.label }}</span>
+                                </h4>
+                                <div class="entropy-scale__bar">
+                                    <div class="entropy-scale__fill" style="width:{{ results.entropy_benchmark.position }}%;"></div>
+                                    <div class="entropy-scale__marker" style="left:{{ results.entropy_benchmark.position }}%;" title="{{ results.entropy|default:'0' }} bits"></div>
+                                </div>
+                                <div class="entropy-scale__labels">
+                                    <span class="entropy-scale__label" style="left:0%;">0</span>
+                                    <span class="entropy-scale__label" style="left:21.9%;">28</span>
+                                    <span class="entropy-scale__label" style="left:31.3%;">40</span>
+                                    <span class="entropy-scale__label" style="left:46.9%;">60</span>
+                                    <span class="entropy-scale__label" style="left:62.5%;">80</span>
+                                    <span class="entropy-scale__label" style="left:78.1%;">100</span>
+                                    <span class="entropy-scale__label" style="left:100%;">128</span>
+                                </div>
+                                <div class="entropy-scale__zones">
+                                    <span class="entropy-scale__zone entropy-scale__zone--danger">Common</span>
+                                    <span class="entropy-scale__zone entropy-scale__zone--warning">Basic</span>
+                                    <span class="entropy-scale__zone entropy-scale__zone--good">Good</span>
+                                    <span class="entropy-scale__zone entropy-scale__zone--excellent">Excellent</span>
                                 </div>
                             </div>
                             {% endif %}

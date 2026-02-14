@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .utils import check_password_strength
+from .utils import check_password_strength, password_similarity
 from django.utils.crypto import get_random_string
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
@@ -147,9 +147,11 @@ def index(request):
             # Comparison
             if compare_pw:
                 compare_results = check_password_strength(compare_pw, deep=True, custom_dict=custom_dict)
+                similarity = password_similarity(password, compare_pw)
                 context['compare'] = {
                     'pw': '********',
-                    'results': compare_results
+                    'results': compare_results,
+                    'similarity': similarity,
                 }
         else:
             context['error'] = "Please enter a password."

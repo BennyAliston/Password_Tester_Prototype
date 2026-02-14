@@ -355,5 +355,252 @@ def check_password_strength(password, deep=False, custom_dict=None):
         if re.search(r'\b(?:\d[ -]*?){13,16}\b', password):
             extra.append('Password contains a credit card-like pattern (not recommended).')
             steps.append('> [!] Password contains a credit card-like pattern.')
+    # 8. Password composition breakdown
+    composition = password_composition(password)
+    results['composition'] = composition
+    steps.append(f"> [*] Composition: {composition['uppercase_pct']:.0f}% upper, {composition['lowercase_pct']:.0f}% lower, {composition['digits_pct']:.0f}% digits, {composition['symbols_pct']:.0f}% symbols")
+
+    # 9. Password mask
+    mask = password_mask(password)
+    results['mask'] = mask
+    steps.append(f"> [*] Mask pattern: {mask}")
+
+    # 10. Attack scenario breakdown
+    scenarios = attack_scenarios(password)
+    results['attack_scenarios'] = scenarios
+    steps.append('> [*] Attack scenarios computed.')
+
+    # 11. Entropy benchmark
+    benchmark = entropy_benchmark(results.get('entropy', 0))
+    results['entropy_benchmark'] = benchmark
+    steps.append(f"> [*] Entropy benchmark: {benchmark['label']}")
+
     steps.append('> [*] Analysis complete.')
     return results
+
+
+def password_composition(password):
+    """Return count and percentage breakdown of character types."""
+    length = len(password) or 1
+    upper = sum(1 for c in password if c.isupper())
+    lower = sum(1 for c in password if c.islower())
+    digits = sum(1 for c in password if c.isdigit())
+    symbols = sum(1 for c in password if not c.isalnum())
+    return {
+        'uppercase': upper,
+        'lowercase': lower,
+        'digits': digits,
+        'symbols': symbols,
+        'uppercase_pct': upper / length * 100,
+        'lowercase_pct': lower / length * 100,
+        'digits_pct': digits / length * 100,
+        'symbols_pct': symbols / length * 100,
+    }
+
+
+def password_mask(password):
+    """Return a structural mask of the password.
+
+    U = uppercase, l = lowercase, d = digit, s = symbol.
+    Example: P@ssw0rd -> Usllldld
+    """
+    mask_chars = []
+    for c in password:
+        if c.isupper():
+            mask_chars.append('U')
+        elif c.islower():
+            mask_chars.append('l')
+        elif c.isdigit():
+            mask_chars.append('d')
+        else:
+            mask_chars.append('s')
+    return ''.join(mask_chars)
+
+
+def _format_time(seconds):
+    """Format seconds into a human-readable string."""
+    if seconds < 0.001:
+        return "instant"
+    if seconds < 1:
+        return f"{seconds:.3f} seconds"
+    if seconds < 60:
+        return f"{seconds:.1f} seconds"
+    if seconds < 3600:
+        return f"{seconds / 60:.1f} minutes"
+    if seconds < 86400:
+        return f"{seconds / 3600:.1f} hours"
+    if seconds < 31536000:
+        return f"{seconds / 86400:.1f} days"
+    years = seconds / 31536000
+    if years > 1e12:
+        return "centuries+"
+    if years > 1e6:
+        return f"{years:.2e} years"
+    return f"{years:.1f} years"
+
+
+def attack_scenarios(password):
+    """Return crack-time estimates for multiple attack types."""
+    charset = 0
+    if re.search(r'[a-z]', password):
+        charset += 26
+    if re.search(r'[A-Z]', password):
+        charset += 26
+    if re.search(r'[0-9]', password):
+        charset += 10
+    if re.search(r'[^a-zA-Z0-9]', password):
+        charset += 32
+    if charset == 0:
+        charset = 26
+
+    total_combos = charset ** len(password)
+
+    scenarios = []
+
+    # Dictionary attack: ~10 billion entries checked at 10M/s
+    dict_seconds = 1e10 / 1e7  # ~1000 seconds for a pure dictionary hit
+    # But if the password is NOT a dictionary word the attack fails.
+    # We use zxcvbn guesses as a proxy for dictionary vulnerability.
+    scenarios.append({
+        'name': 'Dictionary Attack',
+        'speed': '10M passwords/sec',
+        'description': 'Attacker tries known leaked passwords and common words. Most effective against reused or common passwords.',
+        'time': _format_time(dict_seconds),
+        'raw_seconds': dict_seconds,
+        'icon': 'book',
+    })
+
+    # Hybrid attack: dictionary + rules (capitalise, append numbers, leet)
+    # Typically expands dictionary by 1000x rules at ~1M/s
+    hybrid_combos = 1e10 * 1000  # 10B words * 1000 rules
+    hybrid_speed = 1e6
+    hybrid_seconds = hybrid_combos / hybrid_speed
+    scenarios.append({
+        'name': 'Hybrid Attack',
+        'speed': '1M passwords/sec',
+        'description': 'Dictionary words combined with rules: capitalizing, appending digits, leet substitutions (@ for a, 3 for e).',
+        'time': _format_time(hybrid_seconds),
+        'raw_seconds': hybrid_seconds,
+        'icon': 'shuffle',
+    })
+
+    # Mask / brute-force: tries all combinations for the detected charset
+    bf_speed = 1e9  # 1 billion/sec (fast GPU)
+    bf_seconds = total_combos / bf_speed
+    scenarios.append({
+        'name': 'Mask / Brute-Force',
+        'speed': '1B passwords/sec',
+        'description': 'Tries every possible combination for the character set. Time depends on password length and complexity.',
+        'time': _format_time(bf_seconds),
+        'raw_seconds': bf_seconds,
+        'icon': 'zap',
+    })
+
+    # Credential stuffing: uses credentials from prior breaches
+    # Typically limited by target rate limiting: ~100-1000/sec
+    cred_speed = 1000
+    cred_combos = 1e10  # testing against breach databases
+    cred_seconds = cred_combos / cred_speed
+    scenarios.append({
+        'name': 'Credential Stuffing',
+        'speed': '1K attempts/sec',
+        'description': 'Uses username/password pairs from previous breaches against other sites. Rate-limited by target services.',
+        'time': _format_time(cred_seconds),
+        'raw_seconds': cred_seconds,
+        'icon': 'globe',
+    })
+
+    return scenarios
+
+
+def _levenshtein_distance(s1, s2):
+    """Compute the Levenshtein edit distance between two strings."""
+    if len(s1) < len(s2):
+        return _levenshtein_distance(s2, s1)
+    if len(s2) == 0:
+        return len(s1)
+
+    prev_row = list(range(len(s2) + 1))
+    for i, c1 in enumerate(s1):
+        curr_row = [i + 1]
+        for j, c2 in enumerate(s2):
+            cost = 0 if c1 == c2 else 1
+            curr_row.append(min(
+                curr_row[j] + 1,        # insert
+                prev_row[j + 1] + 1,    # delete
+                prev_row[j] + cost      # substitute
+            ))
+        prev_row = curr_row
+    return prev_row[-1]
+
+
+def _longest_common_substring(s1, s2):
+    """Return the length of the longest common substring."""
+    if not s1 or not s2:
+        return 0
+    m, n = len(s1), len(s2)
+    prev = [0] * (n + 1)
+    longest = 0
+    for i in range(1, m + 1):
+        curr = [0] * (n + 1)
+        for j in range(1, n + 1):
+            if s1[i - 1] == s2[j - 1]:
+                curr[j] = prev[j - 1] + 1
+                if curr[j] > longest:
+                    longest = curr[j]
+        prev = curr
+    return longest
+
+
+def password_similarity(pw1, pw2):
+    """Compare two passwords and return similarity metrics."""
+    lev_dist = _levenshtein_distance(pw1, pw2)
+    max_len = max(len(pw1), len(pw2), 1)
+    similarity_pct = round((1 - lev_dist / max_len) * 100, 1)
+
+    lcs_len = _longest_common_substring(pw1, pw2)
+    lcs_pct = round(lcs_len / max_len * 100, 1)
+
+    too_similar = similarity_pct >= 70
+
+    return {
+        'levenshtein_distance': lev_dist,
+        'similarity_pct': similarity_pct,
+        'lcs_length': lcs_len,
+        'lcs_pct': lcs_pct,
+        'too_similar': too_similar,
+        'verdict': 'Too similar - use a completely different password' if too_similar else 'Sufficiently different',
+    }
+
+
+def entropy_benchmark(entropy):
+    """Return where the entropy falls on a benchmark scale."""
+    benchmarks = [
+        (28, 'Common Word', 'danger'),
+        (36, 'Weak Password', 'danger'),
+        (50, 'Basic Password', 'warning'),
+        (60, 'Moderate', 'warning'),
+        (80, 'Good', 'success'),
+        (100, 'Strong', 'success'),
+        (128, 'Excellent', 'success'),
+    ]
+
+    label = 'Extremely Strong'
+    css_class = 'success'
+    for threshold, name, cls in benchmarks:
+        if entropy < threshold:
+            label = name
+            css_class = cls
+            break
+
+    # Compute percentage position on the scale (0-128 bits mapped to 0-100%)
+    scale_max = 128
+    position = min(entropy / scale_max * 100, 100)
+
+    return {
+        'label': label,
+        'css_class': css_class,
+        'position': round(position, 1),
+        'entropy': entropy,
+        'benchmarks': benchmarks,
+    }

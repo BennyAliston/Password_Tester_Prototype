@@ -5,18 +5,23 @@ A comprehensive web application for password security analysis, strength testing
 ## 🚀 Features
 
 ### Core Functionality
-- **Password Strength Analysis** - Real-time strength meter using zxcvbn algorithm
-- **Breach Detection** - Integration with HaveIBeenPwned API using k-anonymity for privacy
-- **Password Generator** - Strong password generation with customizable options
-- **Custom Dictionary** - Upload and manage custom disallowed word lists
-- **Password History** - Secure hashed storage of previously tested passwords
+- **Password Strength Analysis** — Real-time strength meter using zxcvbn algorithm
+- **Breach Detection** — Integration with HaveIBeenPwned API using k-anonymity for privacy
+- **Password Generator** — Strong password generation with customizable options
+- **Custom Dictionary** — Upload and manage custom disallowed word lists
+- **Password History** — Secure hashed storage of previously tested passwords
+
+### Generation & Tools
+- **Passphrase Generator** — Diceware-style passphrases from a built-in 1,300-word list with configurable word count, separator, and capitalization
+- **Password Scoring History** — Session-based trend chart tracking zxcvbn scores across analyses (canvas-drawn, no external charting library)
+- **Bulk Password Audit** — Analyze up to 100 passwords at once via textarea or file upload; returns a table with scores, labels, and suggestions
 
 ### Advanced Features
-- **Asynchronous Processing** - Celery-based background tasks for HIBP checks
-- **Intelligent Caching** - Multi-layer caching system for performance optimization
-- **Secure Token System** - Server-side token mapping for safe client polling
-- **Retry Logic** - Exponential backoff for network resilience
-- **Form Validation** - Comprehensive input validation and security checks
+- **Asynchronous Processing** — Celery-based background tasks for HIBP checks
+- **Intelligent Caching** — Multi-layer caching system for performance optimization
+- **Secure Token System** — Server-side token mapping for safe client polling
+- **Retry Logic** — Exponential backoff for network resilience
+- **Form Validation** — Comprehensive input validation and security checks
 
 ## 🛠️ Quick Start
 
@@ -34,11 +39,11 @@ A comprehensive web application for password security analysis, strength testing
 
 2. **Create and activate virtual environment**
    ```bash
-   python -m venv ptvienv
+   python -m venv venv
    # Windows
-   ptvienv\Scripts\activate
+   venv\Scripts\activate
    # Linux/Mac
-   source ptvienv/bin/activate
+   source venv/bin/activate
    ```
 
 3. **Install dependencies**
@@ -103,6 +108,22 @@ SECURE_SSL_REDIRECT=True
 2. View real-time strength analysis and recommendations
 3. Check breach status (may require polling for async results)
 
+### Passphrase Generator
+1. Navigate to the **Passphrase** section
+2. Adjust word count (3–10), separator, and capitalization
+3. Click **Generate** for a Diceware-style passphrase with entropy readout
+4. Copy to clipboard with one click
+
+### Bulk Password Audit
+1. Navigate to the **Bulk Audit** section
+2. Paste passwords (one per line) or upload a `.txt` file (max 1 MB, 100 passwords)
+3. Click **Audit Passwords** to get a table of scores, strength labels, and suggestions
+
+### Scoring History
+- Every password analyzed in the main analyzer is scored and tracked in your session
+- View the trend chart in the **Scoring History** section
+- Clear history at any time with the **Clear History** button
+
 ### Custom Dictionary Management
 1. Upload a `.txt` file with disallowed words (max 2MB)
 2. Words are automatically deduplicated and case-normalized
@@ -120,14 +141,19 @@ SECURE_SSL_REDIRECT=True
 # Install test dependencies
 pip install -r requirements.txt
 
-# Run all tests
+# Run all tests (Django)
+python manage.py test pwdchecker.tests -v2
+
+# Run all tests (pytest)
 pytest -q
 
 # Run with coverage
 pytest --cov=pwdchecker
 
-# Run specific test file
-pytest pwdchecker/tests_forms.py -v
+# Run a specific test module
+pytest pwdchecker/tests/test_forms.py -v
+pytest pwdchecker/tests/test_utils.py -v
+pytest pwdchecker/tests/test_views.py -v
 ```
 
 ### Code Quality Checks
@@ -153,16 +179,23 @@ mypy .
 - **Forms** (`pwdchecker/forms.py`)
   - `PasswordCheckForm` for password validation
   - `CustomDictUploadForm` with size limits and validation
+  - `PassphraseForm` for passphrase generation options
+  - `BulkAuditForm` for bulk password analysis input
 
 - **Views** (`pwdchecker/views.py`)
   - Form-based password checking
   - Secure file upload handling
   - AJAX endpoints for async operations
+  - `generate_passphrase_view` — Diceware passphrase API
+  - `bulk_audit_view` — bulk password scoring API
+  - `score_history_view` / `clear_score_history_view` — session score management
 
 - **Utils** (`pwdchecker/utils.py`)
   - HIBP integration with k-anonymity
   - Retry logic with exponential backoff
   - Multi-layer caching system
+  - `generate_passphrase()` — cryptographically secure word selection
+  - `quick_score()` — lightweight zxcvbn-only scoring for bulk use
 
 - **Tasks** (`pwdchecker/tasks.py`)
   - Celery tasks for background processing
@@ -187,20 +220,47 @@ mypy .
 ## 📁 Project Structure
 
 ```
-password_tester_prototype/
-├── password_tester/          # Django project settings
-│   ├── celery.py            # Celery configuration
-│   └── settings.py          # Django settings
-├── pwdchecker/              # Main application
-│   ├── forms.py             # Form definitions
-│   ├── models.py            # Database models
-│   ├── tasks.py             # Celery tasks
-│   ├── utils.py             # Utility functions
-│   ├── views.py             # View functions
-│   └── tests_forms.py       # Unit tests
-├── templates/               # HTML templates
-├── requirements.txt         # Python dependencies
-└── .github/workflows/       # CI/CD configuration
+Password_Tester_Prototype/
+├── manage.py                     # Django management script
+├── requirements.txt              # Python dependencies
+├── pyproject.toml                # Project metadata & tool config
+├── build.sh                      # Production build script
+├── render.yaml                   # Render.com deployment config
+├── conftest.py                   # Shared pytest fixtures
+├── README.md
+├── LICENSE
+├── docs/
+│   └── DOCUMENTATION.md          # Detailed project documentation
+├── .github/workflows/
+│   └── ci.yml                    # CI/CD pipeline
+├── password_tester/              # Django project settings
+│   ├── settings.py
+│   ├── urls.py
+│   ├── celery.py
+│   ├── wsgi.py
+│   └── asgi.py
+└── pwdchecker/                   # Main application
+    ├── apps.py
+    ├── models.py                 # Database models
+    ├── forms.py                  # Form definitions
+    ├── views.py                  # View functions & AJAX endpoints
+    ├── urls.py                   # App URL routing
+    ├── utils.py                  # Utility functions & algorithms
+    ├── tasks.py                  # Celery background tasks
+    ├── data/
+    │   ├── common_passwords.txt  # Common password dictionary
+    │   └── diceware_words.txt    # Passphrase word list (~1,300 words)
+    ├── static/pwdchecker/
+    │   ├── main.js               # Client-side interactivity
+    │   ├── styles.css            # Application styles
+    │   └── vendor/               # Third-party static assets
+    ├── templates/pwdchecker/
+    │   └── index.html            # Main single-page template
+    ├── tests/
+    │   ├── test_forms.py         # Form & view integration tests
+    │   ├── test_utils.py         # Utility function unit tests
+    │   └── test_views.py         # View integration tests
+    └── migrations/               # Database migrations
 ```
 
 ## 🚀 Deployment
@@ -242,6 +302,21 @@ Kritagya Kumar (Benny Aliston)
 
 ## 🔄 Recent Updates
 
+### Version 2.1 (16-02-2026)
+
+**New Features:**
+- Diceware-style **Passphrase Generator** with configurable word count, separator, and capitalization
+- **Password Scoring History** — session-based trend chart drawn on canvas
+- **Bulk Password Audit** — analyze up to 100 passwords via textarea or file upload
+
+**Project Restructuring:**
+- Moved data files to `pwdchecker/data/` (was `pwdchecker/pwdchecker/`)
+- Moved templates into app directory (`pwdchecker/templates/pwdchecker/`)
+- Organized tests into `pwdchecker/tests/` package with `test_` prefix convention
+- Added `docs/` folder for project documentation
+- Added `static/pwdchecker/vendor/` for third-party static assets
+- Fixed HTML template linter errors by replacing inline Django variables with `data-*` attributes
+
 ### Version 2.0 (13-10-2025)
 
 **Security Enhancements:**
@@ -257,21 +332,14 @@ Kritagya Kumar (Benny Aliston)
 - Bulk database operations for dictionary uploads
 
 **Developer Experience:**
-- Comprehensive test suite with unit tests
+- Comprehensive test suite (78 tests)
 - CI/CD pipeline with GitHub Actions
 - Code quality tools (black, flake8, mypy)
 - Detailed documentation and setup guides
 
-**New Features:**
-- Custom dictionary upload with deduplication
-- Background task processing for HIBP checks
-- Secure file upload handling
-- Enhanced error handling and user feedback
-
 ### Migration Required
 After pulling the latest changes, run:
 ```bash
-python manage.py makemigrations
 python manage.py migrate
 ```
 

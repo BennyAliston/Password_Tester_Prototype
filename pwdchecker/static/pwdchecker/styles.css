@@ -632,11 +632,16 @@ img, svg {
 /* ==========================================================================
    10. Analyzer Section
    ========================================================================== */
+.analyzer .container {
+    max-width: 1400px;
+}
+
 .analyzer__cards {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-xl);
     margin-bottom: var(--space-xl);
+    align-items: start;
 }
 
 .card--compact {
@@ -724,12 +729,19 @@ img, svg {
     text-transform: uppercase;
     letter-spacing: 0.08em;
     margin-bottom: var(--space-md);
-    min-height: 1.2em;
+}
+
+.strength-meter__label:empty {
+    display: none;
 }
 
 .policy-list {
     margin-bottom: var(--space-md);
     font-size: var(--fs-sm);
+}
+
+.policy-list:empty {
+    display: none;
 }
 
 .policy-list li {
@@ -744,9 +756,17 @@ img, svg {
     font-family: var(--font-display);
 }
 
+.entropy-display:empty {
+    display: none;
+}
+
 .breach-warning {
     font-size: var(--fs-base);
     margin-bottom: var(--space-md);
+}
+
+.breach-warning:empty {
+    display: none;
 }
 
 /* ==========================================================================
@@ -756,10 +776,15 @@ img, svg {
     background: rgba(0, 0, 0, 0.2);
 }
 
+.results-section .container {
+    max-width: 1400px;
+}
+
 .results-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: var(--space-xl);
+    gap: var(--space-2xl);
+    align-items: start;
 }
 
 /* Result Cards */
@@ -775,7 +800,7 @@ img, svg {
 }
 
 .result-card__header {
-    padding: var(--space-lg) var(--space-xl);
+    padding: var(--space-xl) var(--space-2xl);
     border-bottom: var(--border-subtle);
     display: flex;
     align-items: center;
@@ -793,13 +818,12 @@ img, svg {
 }
 
 .result-card__body {
-    padding: var(--space-xl);
+    padding: var(--space-2xl);
 }
 
 .result-card__body ul {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
+    display: grid;
+    gap: var(--space-md);
 }
 
 .result-card__body li {
@@ -870,7 +894,8 @@ img, svg {
 
 /* Policy items */
 .policy-item {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
     align-items: center;
     gap: var(--space-sm);
     padding: var(--space-sm) var(--space-md);
@@ -913,7 +938,7 @@ img, svg {
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    margin: 0 auto var(--space-lg);
+    margin: 0 0 var(--space-lg);
 }
 
 .score-badge__ring {
@@ -1002,15 +1027,14 @@ img, svg {
 
 /* Strength section layout */
 .strength-content {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
     gap: var(--space-2xl);
-    flex-wrap: wrap;
 }
 
 .strength-score {
-    flex-shrink: 0;
-    text-align: center;
+    text-align: left;
 }
 
 .strength-score__label {
@@ -1022,8 +1046,7 @@ img, svg {
 }
 
 .strength-details {
-    flex: 1;
-    min-width: 250px;
+    min-width: 0;
 }
 
 .strength-details h4 {
@@ -1054,11 +1077,13 @@ img, svg {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: var(--space-md);
+    align-items: start;
 }
 
 .report-item {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: start;
     gap: var(--space-md);
     padding: var(--space-md);
     background: rgba(0, 0, 0, 0.2);
@@ -1075,7 +1100,7 @@ img, svg {
 }
 
 .report-item__content {
-    flex: 1;
+    min-width: 0;
 }
 
 .report-item__label {
@@ -2122,8 +2147,7 @@ img, svg {
     }
 
     .strength-content {
-        flex-direction: column;
-        align-items: center;
+        grid-template-columns: 1fr;
     }
 
     .crack-times {
@@ -2257,4 +2281,222 @@ img, svg {
     .result-card__body {
         padding: var(--space-md);
     }
+}
+
+/* ==========================================================================
+   Passphrase Generator
+   ========================================================================== */
+
+.section__subtitle {
+    text-align: center;
+    color: var(--color-text-secondary);
+    max-width: 620px;
+    margin: -0.5rem auto var(--space-xl);
+    font-size: var(--fs-sm);
+    line-height: 1.6;
+}
+
+.passphrase-output {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    background: rgba(0, 0, 0, 0.35);
+    border: var(--border-glass);
+    border-radius: var(--radius-md);
+    padding: var(--space-md) var(--space-lg);
+    margin-bottom: var(--space-md);
+    min-height: 56px;
+    flex-wrap: wrap;
+}
+
+.passphrase-output__text {
+    flex: 1;
+    font-family: var(--font-mono);
+    font-size: var(--fs-lg);
+    color: var(--color-primary);
+    word-break: break-all;
+    user-select: all;
+    min-width: 0;
+}
+
+.passphrase-entropy {
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-lg);
+}
+
+.passphrase-options {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-lg);
+}
+
+.input-group--inline {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.input-group--inline .input-group__label {
+    margin-bottom: 0;
+    white-space: nowrap;
+    font-size: var(--fs-sm);
+}
+
+.input--small {
+    width: 60px;
+    padding: var(--space-xs) var(--space-sm);
+    background: rgba(0, 0, 0, 0.3);
+    border: var(--border-glass);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    text-align: center;
+}
+
+.input--small:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-glow-sm);
+}
+
+/* ==========================================================================
+   Score History
+   ========================================================================== */
+
+.score-chart-container {
+    background: rgba(0, 0, 0, 0.25);
+    border: var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--space-md);
+    margin-bottom: var(--space-md);
+    overflow-x: auto;
+}
+
+.score-chart-container canvas {
+    display: block;
+    max-width: 100%;
+}
+
+.score-history-info {
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
+    padding: var(--space-sm) 0;
+}
+
+/* ==========================================================================
+   Bulk Password Audit
+   ========================================================================== */
+
+.bulk-textarea {
+    width: 100%;
+    background: rgba(0, 0, 0, 0.3);
+    border: var(--border-glass);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    padding: var(--space-md);
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+.bulk-textarea::placeholder {
+    color: var(--color-text-secondary);
+}
+
+.bulk-textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-glow-sm);
+}
+
+.bulk-upload-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin: var(--space-md) 0;
+    flex-wrap: wrap;
+}
+
+.bulk-upload-row__label {
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+}
+
+.file-label--sm {
+    font-size: var(--fs-xs);
+    padding: var(--space-xs) var(--space-sm);
+}
+
+.bulk-status {
+    margin-top: var(--space-md);
+    font-size: var(--fs-sm);
+    color: var(--color-text-secondary);
+}
+
+.bulk-results {
+    margin-top: var(--space-md);
+}
+
+.bulk-table-wrap {
+    overflow-x: auto;
+    border-radius: var(--radius-md);
+    border: var(--border-subtle);
+}
+
+.bulk-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--fs-sm);
+    white-space: nowrap;
+}
+
+.bulk-table th {
+    background: rgba(57, 255, 20, 0.08);
+    color: var(--color-primary);
+    font-weight: 600;
+    text-align: left;
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: var(--border-glass);
+    position: sticky;
+    top: 0;
+}
+
+.bulk-table td {
+    padding: var(--space-sm) var(--space-md);
+    border-bottom: var(--border-subtle);
+    color: var(--color-text-primary);
+    vertical-align: top;
+}
+
+.bulk-table tr:hover td {
+    background: rgba(57, 255, 20, 0.03);
+}
+
+.bulk-table .mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.05em;
+}
+
+.bulk-score {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    color: #000;
+    font-weight: 600;
+    font-size: var(--fs-xs);
+    white-space: nowrap;
+}
+
+.bulk-table td:last-child {
+    white-space: normal;
+    max-width: 260px;
+    font-size: var(--fs-xs);
+    color: var(--color-text-secondary);
 }

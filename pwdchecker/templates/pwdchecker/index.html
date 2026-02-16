@@ -46,6 +46,8 @@
         </button>
         <ul class="site-nav__links" role="list">
             <li><a href="#analyzer" class="site-nav__link">Analyzer</a></li>
+            <li><a href="#passphrase" class="site-nav__link">Passphrase</a></li>
+            <li><a href="#bulk-audit" class="site-nav__link">Bulk Audit</a></li>
             {% if results %}<li><a href="#results" class="site-nav__link">Results</a></li>{% endif %}
             <li><a href="#how-it-works" class="site-nav__link">How It Works</a></li>
             <li><a href="#faq" class="site-nav__link">FAQ</a></li>
@@ -202,6 +204,113 @@
             </div>
         </section>
 
+        <!-- Passphrase Generator Section -->
+        <section class="passphrase-section section" id="passphrase">
+            <div class="container">
+                <h2 class="section__title">Passphrase Generator</h2>
+                <p class="section__subtitle">Generate memorable Diceware-style passphrases — much stronger and easier to remember than random characters.</p>
+
+                <div class="card card--primary animate-on-scroll">
+                    <div class="card__header">
+                        <svg class="icon card__header-icon"><use href="#icon-key"/></svg>
+                        Diceware Passphrase
+                    </div>
+                    <div class="card__body">
+                        <div class="passphrase-output" id="passphrase-output">
+                            <span class="passphrase-output__text" id="passphrase-text">Click Generate to create a passphrase</span>
+                            <button type="button" class="btn btn--ghost btn--sm" onclick="copyPassphrase()" aria-label="Copy passphrase">
+                                <svg class="icon"><use href="#icon-copy"/></svg> Copy
+                            </button>
+                        </div>
+                        <div class="passphrase-entropy" id="passphrase-entropy"></div>
+
+                        <div class="passphrase-options">
+                            <div class="range-group">
+                                <span class="range-group__label">Words</span>
+                                <input type="range" id="pp_word_count" min="3" max="10" value="4" aria-label="Word count">
+                                <span class="range-group__value" id="pp_word_count_readout">4</span>
+                            </div>
+                            <div class="input-group input-group--inline">
+                                <label class="input-group__label" for="pp_separator">Separator</label>
+                                <input type="text" id="pp_separator" value="-" maxlength="5" class="input--small" aria-label="Word separator">
+                            </div>
+                            <label class="checkbox-pill">
+                                <input type="checkbox" id="pp_capitalize" aria-label="Capitalize words"> Capitalize
+                            </label>
+                        </div>
+
+                        <div class="btn-group">
+                            <button type="button" class="btn btn--primary" onclick="generatePassphrase()" aria-label="Generate passphrase">
+                                <svg class="icon"><use href="#icon-shuffle"/></svg> Generate
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Score History Section -->
+        <section class="score-history-section section" id="score-history">
+            <div class="container">
+                <h2 class="section__title">Scoring History</h2>
+                <p class="section__subtitle">Track your password scores across this session. See if you're improving!</p>
+
+                <div class="card card--secondary animate-on-scroll">
+                    <div class="card__header">
+                        <svg class="icon card__header-icon"><use href="#icon-activity"/></svg>
+                        Session Score Trend
+                    </div>
+                    <div class="card__body">
+                        <div class="score-chart-container" id="score-chart-container">
+                            <canvas id="score-chart" width="600" height="200"></canvas>
+                        </div>
+                        <div class="score-history-info" id="score-history-info"></div>
+                        <div class="btn-group" style="margin-top:var(--space-md);">
+                            <button type="button" class="btn btn--danger btn--sm" onclick="clearScoreHistory()" aria-label="Clear score history">
+                                <svg class="icon"><use href="#icon-x"/></svg> Clear History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bulk Password Audit Section -->
+        <section class="bulk-audit-section section" id="bulk-audit">
+            <div class="container">
+                <h2 class="section__title">Bulk Password Audit</h2>
+                <p class="section__subtitle">Analyze multiple passwords at once. Paste them below (one per line) or upload a text file.</p>
+
+                <div class="card card--primary animate-on-scroll">
+                    <div class="card__header">
+                        <svg class="icon card__header-icon"><use href="#icon-file-text"/></svg>
+                        Bulk Analysis
+                    </div>
+                    <div class="card__body">
+                        <div class="input-group">
+                            <label class="input-group__label" for="bulk_passwords">Passwords (one per line)</label>
+                            <textarea id="bulk_passwords" name="bulk_passwords" rows="6" placeholder="Enter passwords, one per line..." class="bulk-textarea"></textarea>
+                        </div>
+                        <div class="bulk-upload-row">
+                            <span class="bulk-upload-row__label">Or upload a .txt file:</span>
+                            <input type="file" id="bulk_file" accept=".txt" class="file-input" onchange="showBulkFilename(this)" aria-label="Upload passwords file">
+                            <label for="bulk_file" class="file-label file-label--sm">
+                                <svg class="icon"><use href="#icon-file-text"/></svg> Choose File
+                            </label>
+                            <span id="bulk-filename" class="filename" aria-live="polite"></span>
+                        </div>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn--primary" onclick="runBulkAudit()" aria-label="Audit passwords">
+                                <svg class="icon"><use href="#icon-shield"/></svg> Audit Passwords
+                            </button>
+                        </div>
+                        <div id="bulk-audit-status" class="bulk-status"></div>
+                        <div id="bulk-audit-results" class="bulk-results"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- Results Section (conditional) -->
         {% if results %}
         <section class="results-section section" id="results">
@@ -307,16 +416,16 @@
                             <div class="composition-chart">
                                 <div class="composition-bar">
                                     {% if results.composition.uppercase_pct > 0 %}
-                                    <div class="composition-bar__segment composition-bar__segment--upper" style="width:{{ results.composition.uppercase_pct }}%;" title="Uppercase: {{ results.composition.uppercase_pct|floatformat:0 }}%"></div>
+                                    <div class="composition-bar__segment composition-bar__segment--upper" data-width="{{ results.composition.uppercase_pct }}" title="Uppercase: {{ results.composition.uppercase_pct|floatformat:0 }}%"></div>
                                     {% endif %}
                                     {% if results.composition.lowercase_pct > 0 %}
-                                    <div class="composition-bar__segment composition-bar__segment--lower" style="width:{{ results.composition.lowercase_pct }}%;" title="Lowercase: {{ results.composition.lowercase_pct|floatformat:0 }}%"></div>
+                                    <div class="composition-bar__segment composition-bar__segment--lower" data-width="{{ results.composition.lowercase_pct }}" title="Lowercase: {{ results.composition.lowercase_pct|floatformat:0 }}%"></div>
                                     {% endif %}
                                     {% if results.composition.digits_pct > 0 %}
-                                    <div class="composition-bar__segment composition-bar__segment--digit" style="width:{{ results.composition.digits_pct }}%;" title="Digits: {{ results.composition.digits_pct|floatformat:0 }}%"></div>
+                                    <div class="composition-bar__segment composition-bar__segment--digit" data-width="{{ results.composition.digits_pct }}" title="Digits: {{ results.composition.digits_pct|floatformat:0 }}%"></div>
                                     {% endif %}
                                     {% if results.composition.symbols_pct > 0 %}
-                                    <div class="composition-bar__segment composition-bar__segment--symbol" style="width:{{ results.composition.symbols_pct }}%;" title="Symbols: {{ results.composition.symbols_pct|floatformat:0 }}%"></div>
+                                    <div class="composition-bar__segment composition-bar__segment--symbol" data-width="{{ results.composition.symbols_pct }}" title="Symbols: {{ results.composition.symbols_pct|floatformat:0 }}%"></div>
                                     {% endif %}
                                 </div>
                                 <div class="composition-legend">
@@ -389,7 +498,7 @@
                                 </h4>
                                 <div class="similarity-meter">
                                     <div class="similarity-meter__bar">
-                                        <div class="similarity-meter__fill {% if compare.similarity.too_similar %}similarity-meter__fill--danger{% else %}similarity-meter__fill--safe{% endif %}" style="width:{{ compare.similarity.similarity_pct }}%;"></div>
+                                        <div class="similarity-meter__fill {% if compare.similarity.too_similar %}similarity-meter__fill--danger{% else %}similarity-meter__fill--safe{% endif %}" data-width="{{ compare.similarity.similarity_pct }}"></div>
                                     </div>
                                     <span class="similarity-meter__pct {% if compare.similarity.too_similar %}similarity-meter__pct--danger{% else %}similarity-meter__pct--safe{% endif %}">{{ compare.similarity.similarity_pct }}%</span>
                                 </div>
@@ -506,8 +615,8 @@
                                     <span class="entropy-scale__badge entropy-scale__badge--{{ results.entropy_benchmark.css_class }}">{{ results.entropy_benchmark.label }}</span>
                                 </h4>
                                 <div class="entropy-scale__bar">
-                                    <div class="entropy-scale__fill" style="width:{{ results.entropy_benchmark.position }}%;"></div>
-                                    <div class="entropy-scale__marker" style="left:{{ results.entropy_benchmark.position }}%;" title="{{ results.entropy|default:'0' }} bits"></div>
+                                    <div class="entropy-scale__fill" data-width="{{ results.entropy_benchmark.position }}"></div>
+                                    <div class="entropy-scale__marker" data-left="{{ results.entropy_benchmark.position }}" title="{{ results.entropy|default:'0' }} bits"></div>
                                 </div>
                                 <div class="entropy-scale__labels">
                                     <span class="entropy-scale__label" style="left:0%;">0</span>
@@ -717,19 +826,48 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
     <script src="{% static 'pwdchecker/main.js' %}"></script>
+    {{ score_history|json_script:"score-history-data" }}
+    <div id="pba-config" style="display:none;"
+         data-hibp-token="{{ hibp_token|default:''}}"
+         data-hibp-status-url="{% url 'pwdchecker:hibp_status' %}"
+         data-has-results="{% if results %}true{% else %}false{% endif %}"
+         data-hibp-count="{{ results.hibp_count|default_if_none:0 }}"
+         data-generate-passphrase-url="{% url 'pwdchecker:generate_passphrase' %}"
+         data-bulk-audit-url="{% url 'pwdchecker:bulk_audit' %}"
+         data-clear-score-history-url="{% url 'pwdchecker:clear_score_history' %}"
+         data-csrf-token="{{ csrf_token }}"
+    ></div>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            var cfg = document.getElementById('pba-config').dataset;
             // Initialize HIBP polling if token exists
-            var hibpToken = '{{ hibp_token|default:""|escapejs }}';
-            if (hibpToken) {
-                initHibpPolling(hibpToken, "{% url 'pwdchecker:hibp_status' %}");
+            if (cfg.hibpToken) {
+                initHibpPolling(cfg.hibpToken, cfg.hibpStatusUrl);
             }
             // Initialize dark web scan animation if results exist
-            {% if results %}
-            var hibpCount = parseInt("{{ results.hibp_count|default_if_none:0 }}", 10);
-            if (isNaN(hibpCount)) hibpCount = 0;
-            initDarkwebScan(hibpCount);
-            {% endif %}
+            if (cfg.hasResults === 'true') {
+                var hibpCount = parseInt(cfg.hibpCount, 10);
+                if (isNaN(hibpCount)) hibpCount = 0;
+                initDarkwebScan(hibpCount);
+            }
+            // Initialize Score History chart
+            var scoreHistoryEl = document.getElementById('score-history-data');
+            var scoreHistory = scoreHistoryEl ? JSON.parse(scoreHistoryEl.textContent) : [];
+            initScoreHistoryChart(scoreHistory);
+            // Configure API endpoints for JS
+            window.PBA_URLS = {
+                generatePassphrase: cfg.generatePassphraseUrl,
+                bulkAudit: cfg.bulkAuditUrl,
+                clearScoreHistory: cfg.clearScoreHistoryUrl
+            };
+            window.PBA_CSRF = cfg.csrfToken;
+            // Apply dynamic widths/positions from data attributes
+            document.querySelectorAll('[data-width]').forEach(function (el) {
+                el.style.width = el.dataset.width + '%';
+            });
+            document.querySelectorAll('[data-left]').forEach(function (el) {
+                el.style.left = el.dataset.left + '%';
+            });
         });
     </script>
 </body>

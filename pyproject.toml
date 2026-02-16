@@ -88,7 +88,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "password_tester.settings"
-python_files = ["tests*.py", "test_*.py"]
+python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
@@ -96,7 +96,7 @@ addopts = [
     "--tb=short",
     "--strict-markers",
 ]
-testpaths = ["pwdchecker"]
+testpaths = ["pwdchecker/tests"]
 filterwarnings = [
     "ignore::DeprecationWarning",
 ]
@@ -105,7 +105,7 @@ filterwarnings = [
 source = ["pwdchecker"]
 omit = [
     "*/migrations/*",
-    "*/tests*.py",
+    "*/tests/*",
     "*/__pycache__/*",
 ]
 
@@ -121,5 +121,5 @@ precision = 2
 show_missing = true
 
 [tool.bandit]
-exclude_dirs = ["tests", "migrations", "venv", "ptvienv"]
+exclude_dirs = ["pwdchecker/tests", "migrations", "venv", "ptvienv"]
 skips = ["B101"]  # Skip assert warnings in tests

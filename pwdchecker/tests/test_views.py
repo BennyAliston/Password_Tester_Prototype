@@ -60,7 +60,7 @@ class TestIndexView(TestCase):
         )
         
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Results for:')
+        self.assertContains(response, 'Analysis Results')
 
     def test_index_post_empty_password(self):
         """POST without password should show error."""

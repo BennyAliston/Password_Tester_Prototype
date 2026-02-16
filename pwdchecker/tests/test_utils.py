@@ -19,6 +19,8 @@ from pwdchecker.utils import (
     check_leet_dictionary,
     brute_force_time,
     check_password_strength,
+    generate_passphrase,
+    quick_score,
 )
 
 
@@ -262,3 +264,81 @@ class TestCheckPasswordStrength(TestCase):
         
         self.assertIsInstance(result['steps'], list)
         self.assertGreater(len(result['steps']), 0)
+
+
+class TestGeneratePassphrase(TestCase):
+    """Test Diceware-style passphrase generation."""
+
+    def test_default_passphrase(self):
+        """Default passphrase should have 4 words separated by dashes."""
+        result = generate_passphrase()
+        self.assertIn('passphrase', result)
+        self.assertIn('entropy', result)
+        pp = result['passphrase']
+        self.assertEqual(len(pp.split('-')), 4)
+        self.assertGreater(result['entropy'], 0)
+
+    def test_custom_word_count(self):
+        """Should respect custom word count."""
+        result = generate_passphrase(word_count=6)
+        self.assertEqual(len(result['passphrase'].split('-')), 6)
+        self.assertEqual(result['word_count'], 6)
+
+    def test_custom_separator(self):
+        """Should use the given separator."""
+        result = generate_passphrase(separator='.')
+        self.assertEqual(result['separator'], '.')
+        self.assertIn('.', result['passphrase'])
+
+    def test_capitalize(self):
+        """Each word should be capitalized when requested."""
+        result = generate_passphrase(capitalize=True)
+        words = result['passphrase'].split('-')
+        for w in words:
+            self.assertTrue(w[0].isupper(), f"'{w}' should start uppercase")
+
+    def test_word_count_clamped_low(self):
+        """Word count below 3 should be clamped to 3."""
+        result = generate_passphrase(word_count=1)
+        self.assertEqual(len(result['passphrase'].split('-')), 3)
+
+    def test_word_count_clamped_high(self):
+        """Word count above 10 should be clamped to 10."""
+        result = generate_passphrase(word_count=20)
+        self.assertEqual(len(result['passphrase'].split('-')), 10)
+
+    def test_entropy_increases_with_words(self):
+        """More words should produce higher entropy."""
+        e4 = generate_passphrase(word_count=4)['entropy']
+        e8 = generate_passphrase(word_count=8)['entropy']
+        self.assertGreater(e8, e4)
+
+    def test_randomness(self):
+        """Two generated passphrases should (almost certainly) differ."""
+        pp1 = generate_passphrase()['passphrase']
+        pp2 = generate_passphrase()['passphrase']
+        # Extremely unlikely they're equal with a large word list
+        # Allow a rare collision but test several to be safe
+        results = set(generate_passphrase()['passphrase'] for _ in range(5))
+        self.assertGreater(len(results), 1)
+
+
+class TestQuickScore(TestCase):
+    """Test the quick_score utility function."""
+
+    def test_weak_password(self):
+        result = quick_score('123456')
+        self.assertIn('score', result)
+        self.assertIn('label', result)
+        self.assertIn('entropy', result)
+        self.assertIn('suggestions', result)
+        self.assertLessEqual(result['score'], 1)
+
+    def test_strong_password(self):
+        result = quick_score('Xk9#mP!2vL@wQz$4')
+        self.assertGreaterEqual(result['score'], 3)
+
+    def test_returns_suggestions(self):
+        result = quick_score('aaa')
+        self.assertIsInstance(result['suggestions'], list)
+        self.assertGreater(len(result['suggestions']), 0)

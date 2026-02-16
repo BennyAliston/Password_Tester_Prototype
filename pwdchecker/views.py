@@ -1,12 +1,13 @@
 from django.shortcuts import render
-from .utils import check_password_strength, password_similarity
+from .utils import check_password_strength, password_similarity, generate_passphrase, quick_score
 from django.utils.crypto import get_random_string
 from django.core.files.uploadedfile import UploadedFile
 from django.db import transaction
 import hashlib
+import json
 
 from .models import DisallowedWord
-from .forms import PasswordCheckForm, CustomDictUploadForm
+from .forms import PasswordCheckForm, CustomDictUploadForm, PassphraseForm, BulkAuditForm
 from django.http import JsonResponse
 from django.core.cache import cache
 from django.utils.crypto import get_random_string
@@ -144,6 +145,18 @@ def index(request):
                 advanced_feedback.extend(strength_results['extra_checks'])
             context['basic_feedback'] = basic_feedback
             context['advanced_feedback'] = advanced_feedback
+
+            # --- Password Scoring History (session-based) ---
+            score = 0
+            zxcvbn_res = strength_results.get('zxcvbn_result')
+            if zxcvbn_res:
+                score = zxcvbn_res.get('score', 0)
+            score_history = request.session.get('score_history', [])
+            score_history.append(score)
+            # Keep last 20 entries
+            score_history = score_history[-20:]
+            request.session['score_history'] = score_history
+
             # Comparison
             if compare_pw:
                 compare_results = check_password_strength(compare_pw, deep=True, custom_dict=custom_dict)
@@ -163,6 +176,10 @@ def index(request):
     else:
         # GET -> empty forms rendered
         context = {**context, 'pwd_form': pwd_form, 'upload_form': upload_form}
+
+    # Always pass score history to template for the trend chart
+    score_history = request.session.get('score_history', [])
+    context['score_history'] = score_history
 
     # Ensure forms are present in context for template rendering
     context.setdefault('pwd_form', pwd_form)
@@ -185,3 +202,97 @@ def hibp_status(request):
     if val is None:
         return JsonResponse({'status': 'pending'})
     return JsonResponse({'status': 'ready', 'hibp_count': val})
+
+
+def generate_passphrase_view(request):
+    """AJAX endpoint to generate a Diceware-style passphrase."""
+    if request.method == 'POST':
+        form = PassphraseForm(request.POST)
+        if form.is_valid():
+            word_count = form.cleaned_data.get('word_count') or 4
+            separator = form.cleaned_data.get('separator')
+            if separator is None or separator == '':
+                separator = '-'
+            capitalize = form.cleaned_data.get('capitalize') or False
+            result = generate_passphrase(
+                word_count=word_count,
+                separator=separator,
+                capitalize=capitalize,
+            )
+            return JsonResponse(result)
+        return JsonResponse({'error': form.errors.as_json()}, status=400)
+    # GET — return defaults
+    result = generate_passphrase()
+    return JsonResponse(result)
+
+
+MAX_BULK_PASSWORDS = 100
+
+
+def bulk_audit_view(request):
+    """AJAX endpoint to audit multiple passwords at once."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+
+    form = BulkAuditForm(request.POST, request.FILES)
+    if not form.is_valid():
+        return JsonResponse({'error': form.errors.as_json()}, status=400)
+
+    # Gather passwords from textarea or file
+    passwords = []
+    text = form.cleaned_data.get('bulk_passwords', '').strip()
+    bulk_file = form.cleaned_data.get('bulk_file')
+
+    if bulk_file:
+        try:
+            raw = bulk_file.read()
+            text = raw.decode('utf-8', errors='replace')
+        except Exception as e:
+            return JsonResponse({'error': f'Failed to read file: {e}'}, status=400)
+
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    passwords = lines[:MAX_BULK_PASSWORDS]
+
+    if not passwords:
+        return JsonResponse({'error': 'No passwords provided.'}, status=400)
+
+    # Score each password (quick mode — no HIBP to avoid rate limits)
+    results = []
+    for i, pw in enumerate(passwords, 1):
+        info = quick_score(pw)
+        # Mask the password for display (show first 2, last 1 char)
+        if len(pw) > 4:
+            masked = pw[:2] + '*' * (len(pw) - 3) + pw[-1]
+        elif len(pw) > 1:
+            masked = pw[0] + '*' * (len(pw) - 1)
+        else:
+            masked = '*'
+        results.append({
+            'index': i,
+            'masked': masked,
+            'length': len(pw),
+            'score': info['score'],
+            'label': info['label'],
+            'entropy': info['entropy'],
+            'suggestions': info['suggestions'],
+        })
+
+    return JsonResponse({
+        'count': len(results),
+        'results': results,
+        'truncated': len(lines) > MAX_BULK_PASSWORDS,
+    })
+
+
+def score_history_view(request):
+    """AJAX endpoint to return the session's score history."""
+    history = request.session.get('score_history', [])
+    return JsonResponse({'scores': history})
+
+
+def clear_score_history_view(request):
+    """AJAX endpoint to clear the session's score history."""
+    if request.method == 'POST':
+        request.session['score_history'] = []
+        return JsonResponse({'status': 'cleared'})
+    return JsonResponse({'error': 'POST required'}, status=405)

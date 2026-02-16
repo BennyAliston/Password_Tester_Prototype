@@ -108,7 +108,7 @@ def brute_force_time(password):
 # Load common words for dictionary/leet checks
 # Loads a list of common passwords from a file for validation.
 import os
-COMMON_WORDS_PATH = os.path.join(os.path.dirname(__file__), 'pwdchecker', 'common_passwords.txt')
+COMMON_WORDS_PATH = os.path.join(os.path.dirname(__file__), 'data', 'common_passwords.txt')
 try:
     with open(COMMON_WORDS_PATH, 'r', encoding='utf-8') as f:
         COMMON_WORDS = set(line.strip().lower() for line in f if line.strip())
@@ -603,4 +603,91 @@ def entropy_benchmark(entropy):
         'position': round(position, 1),
         'entropy': entropy,
         'benchmarks': benchmarks,
+    }
+
+
+# ==========================================================================
+# Diceware-style Passphrase Generator
+# ==========================================================================
+
+DICEWARE_WORDS_PATH = os.path.join(os.path.dirname(__file__), 'data', 'diceware_words.txt')
+try:
+    with open(DICEWARE_WORDS_PATH, 'r', encoding='utf-8') as _f:
+        DICEWARE_WORDS = [line.strip() for line in _f if line.strip()]
+except Exception:
+    DICEWARE_WORDS = []
+
+import secrets
+
+
+def generate_passphrase(word_count=4, separator='-', capitalize=False):
+    """Generate a Diceware-style passphrase from the built-in word list.
+
+    Args:
+        word_count: Number of words in the passphrase (3-10).
+        separator: Character(s) separating words.
+        capitalize: Whether to capitalize each word.
+
+    Returns:
+        dict with 'passphrase', 'entropy', 'word_count', 'separator'.
+    """
+    word_count = max(3, min(word_count, 10))
+    if not DICEWARE_WORDS:
+        return {
+            'passphrase': '',
+            'entropy': 0,
+            'word_count': word_count,
+            'separator': separator,
+            'error': 'Word list not available.',
+        }
+
+    pool_size = len(DICEWARE_WORDS)
+    chosen = [secrets.choice(DICEWARE_WORDS) for _ in range(word_count)]
+    if capitalize:
+        chosen = [w.capitalize() for w in chosen]
+    passphrase = separator.join(chosen)
+
+    # Entropy = word_count * log2(pool_size)
+    entropy = round(word_count * math.log2(pool_size), 2) if pool_size > 0 else 0
+
+    return {
+        'passphrase': passphrase,
+        'entropy': entropy,
+        'word_count': word_count,
+        'separator': separator,
+    }
+
+
+def quick_score(password):
+    """Return a quick score dict for bulk audit (no HIBP, no deep checks).
+
+    Returns dict with 'score' (0-4), 'entropy', 'label', 'suggestions'.
+    """
+    try:
+        result = zxcvbn(password)
+        score = result.get('score', 0)
+    except Exception:
+        score = 0
+        result = {'feedback': {}}
+
+    entropy = calculate_entropy(password)
+    labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong']
+    label = labels[score] if 0 <= score <= 4 else 'Unknown'
+
+    suggestions = []
+    feedback = result.get('feedback') or {}
+    if feedback.get('warning'):
+        suggestions.append(feedback['warning'])
+    suggestions.extend(feedback.get('suggestions', []))
+    if not suggestions:
+        if score <= 1:
+            suggestions.append('Use a longer password with a mix of character types.')
+        elif score == 2:
+            suggestions.append('Consider adding symbols or increasing length.')
+
+    return {
+        'score': score,
+        'entropy': entropy,
+        'label': label,
+        'suggestions': suggestions,
     }

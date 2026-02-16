@@ -52,7 +52,7 @@ repos:
       - id: bandit
         args: ['-c', 'pyproject.toml', '-ll']
         additional_dependencies: ['bandit[toml]']
-        exclude: ^tests/
+        exclude: ^pwdchecker/tests/
 
   # Django specific checks
   - repo: local

@@ -32,8 +32,8 @@ testenv/
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-/media
-/staticfiles
+media/
+staticfiles/
 
 # IDE
 .vscode/
@@ -49,6 +49,7 @@ db.sqlite3-journal
 htmlcov/
 .tox/
 .hypothesis/
+coverage.xml
 
 # Environment variables
 .env
@@ -60,7 +61,3 @@ celerybeat.pid
 
 # Cache
 *.cache
-.github
-.idea
-
-

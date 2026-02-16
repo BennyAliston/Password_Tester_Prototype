@@ -564,6 +564,311 @@
     };
 
     // ==========================================================================
+    // Passphrase Generator
+    // ==========================================================================
+
+    /**
+     * Generate a Diceware-style passphrase via AJAX.
+     */
+    window.generatePassphrase = function () {
+        var wordCount = document.getElementById('pp_word_count');
+        var separator = document.getElementById('pp_separator');
+        var capitalize = document.getElementById('pp_capitalize');
+        var outputText = document.getElementById('passphrase-text');
+        var entropyEl = document.getElementById('passphrase-entropy');
+
+        if (!outputText) return;
+
+        var params = new URLSearchParams();
+        params.set('word_count', wordCount ? wordCount.value : '4');
+        params.set('separator', separator ? separator.value : '-');
+        if (capitalize && capitalize.checked) params.set('capitalize', 'on');
+
+        var url = (window.PBA_URLS && window.PBA_URLS.generatePassphrase) || '/generate-passphrase/';
+
+        outputText.textContent = 'Generating...';
+        if (entropyEl) entropyEl.textContent = '';
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': window.PBA_CSRF || '',
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: params.toString(),
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.error) {
+                outputText.textContent = 'Error: ' + data.error;
+                return;
+            }
+            outputText.textContent = data.passphrase || '';
+            if (entropyEl && data.entropy) {
+                entropyEl.innerHTML = '<svg class="icon" style="width:14px;height:14px;vertical-align:middle;"><use href="#icon-zap"/></svg> ' +
+                    '<b>' + data.entropy + '</b> bits of entropy &mdash; ' + data.word_count + ' words';
+            }
+        })
+        .catch(function (err) {
+            outputText.textContent = 'Network error.';
+            console.error('Passphrase generation error:', err);
+        });
+    };
+
+    /**
+     * Copy passphrase to clipboard.
+     */
+    window.copyPassphrase = function () {
+        var el = document.getElementById('passphrase-text');
+        if (!el || !el.textContent || el.textContent.startsWith('Click') || el.textContent.startsWith('Generating')) return;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(el.textContent)
+                .then(window.showCopyToast)
+                .catch(function () {});
+        }
+    };
+
+    /**
+     * Initialize passphrase word-count slider readout.
+     */
+    function initPassphraseSlider() {
+        var slider = document.getElementById('pp_word_count');
+        var readout = document.getElementById('pp_word_count_readout');
+        if (slider && readout) {
+            readout.textContent = slider.value;
+            slider.addEventListener('input', function () {
+                readout.textContent = this.value;
+            });
+        }
+    }
+
+    // ==========================================================================
+    // Score History Chart (Canvas-based)
+    // ==========================================================================
+
+    /**
+     * Draw a simple line/bar chart of score history on a canvas.
+     * @param {number[]} scores - Array of scores (0-4)
+     */
+    window.initScoreHistoryChart = function (scores) {
+        var canvas = document.getElementById('score-chart');
+        var infoEl = document.getElementById('score-history-info');
+        if (!canvas) return;
+
+        var ctx = canvas.getContext('2d');
+        if (!ctx) return;
+
+        // Use actual display size
+        var dpr = window.devicePixelRatio || 1;
+        var rect = canvas.parentElement.getBoundingClientRect();
+        var w = rect.width || 600;
+        var h = 200;
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        canvas.style.width = w + 'px';
+        canvas.style.height = h + 'px';
+        ctx.scale(dpr, dpr);
+
+        // Clear
+        ctx.clearRect(0, 0, w, h);
+
+        if (!scores || scores.length === 0) {
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = '14px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('No scores yet. Analyze some passwords to see your trend.', w / 2, h / 2);
+            if (infoEl) infoEl.textContent = '';
+            return;
+        }
+
+        var colors = ['#ff3333', '#ff6600', '#ffcc00', '#66cc00', '#39ff14'];
+        var labels = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+        var padding = { top: 30, right: 20, bottom: 40, left: 40 };
+        var chartW = w - padding.left - padding.right;
+        var chartH = h - padding.top - padding.bottom;
+
+        // Draw grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+        ctx.lineWidth = 1;
+        for (var g = 0; g <= 4; g++) {
+            var gy = padding.top + chartH - (g / 4) * chartH;
+            ctx.beginPath();
+            ctx.moveTo(padding.left, gy);
+            ctx.lineTo(w - padding.right, gy);
+            ctx.stroke();
+
+            // Y-axis labels
+            ctx.fillStyle = 'rgba(255,255,255,0.4)';
+            ctx.font = '11px Inter, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText(String(g), padding.left - 8, gy + 4);
+        }
+
+        // Draw bars
+        var barMaxWidth = 40;
+        var gap = 4;
+        var totalBarSpace = chartW / scores.length;
+        var barWidth = Math.min(barMaxWidth, totalBarSpace - gap);
+
+        for (var i = 0; i < scores.length; i++) {
+            var s = scores[i];
+            var barH = (s / 4) * chartH;
+            if (barH < 4) barH = 4; // minimum visible height
+            var x = padding.left + i * totalBarSpace + (totalBarSpace - barWidth) / 2;
+            var y = padding.top + chartH - barH;
+
+            // Bar with color
+            ctx.fillStyle = colors[s] || '#888';
+            ctx.beginPath();
+            // Rounded top
+            var radius = Math.min(4, barWidth / 2);
+            ctx.moveTo(x, y + radius);
+            ctx.arcTo(x, y, x + barWidth, y, radius);
+            ctx.arcTo(x + barWidth, y, x + barWidth, y + barH, radius);
+            ctx.lineTo(x + barWidth, padding.top + chartH);
+            ctx.lineTo(x, padding.top + chartH);
+            ctx.closePath();
+            ctx.fill();
+
+            // Score label on top
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.font = '10px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(String(s), x + barWidth / 2, y - 6);
+
+            // X-axis: test number
+            ctx.fillStyle = 'rgba(255,255,255,0.35)';
+            ctx.fillText('#' + (i + 1), x + barWidth / 2, padding.top + chartH + 18);
+        }
+
+        // Title
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.font = '12px Inter, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('Score (0-4)', padding.left, 16);
+
+        // Info text
+        if (infoEl) {
+            var avg = scores.reduce(function (a, b) { return a + b; }, 0) / scores.length;
+            var latest = scores[scores.length - 1];
+            infoEl.innerHTML =
+                '<span style="color:' + colors[latest] + ';">Latest: ' + labels[latest] + ' (' + latest + '/4)</span>' +
+                ' &bull; Average: ' + avg.toFixed(1) + '/4' +
+                ' &bull; Tests: ' + scores.length;
+        }
+    };
+
+    /**
+     * Clear score history via AJAX and redraw chart.
+     */
+    window.clearScoreHistory = function () {
+        var url = (window.PBA_URLS && window.PBA_URLS.clearScoreHistory) || '/clear-score-history/';
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': window.PBA_CSRF || '' },
+        })
+        .then(function () {
+            window.initScoreHistoryChart([]);
+        })
+        .catch(function (err) {
+            console.error('Clear history error:', err);
+        });
+    };
+
+    // ==========================================================================
+    // Bulk Password Audit
+    // ==========================================================================
+
+    /**
+     * Show selected filename for bulk file upload.
+     */
+    window.showBulkFilename = function (input) {
+        var el = document.getElementById('bulk-filename');
+        if (el && input.files.length > 0) {
+            el.textContent = input.files[0].name;
+        }
+    };
+
+    /**
+     * Run bulk password audit via AJAX.
+     */
+    window.runBulkAudit = function () {
+        var textarea = document.getElementById('bulk_passwords');
+        var fileInput = document.getElementById('bulk_file');
+        var statusEl = document.getElementById('bulk-audit-status');
+        var resultsEl = document.getElementById('bulk-audit-results');
+
+        if (!statusEl || !resultsEl) return;
+
+        var formData = new FormData();
+        var hasText = textarea && textarea.value.trim();
+        var hasFile = fileInput && fileInput.files.length > 0;
+
+        if (!hasText && !hasFile) {
+            statusEl.innerHTML = '<span class="error">Please enter passwords or upload a file.</span>';
+            return;
+        }
+
+        if (hasText) formData.append('bulk_passwords', textarea.value);
+        if (hasFile) formData.append('bulk_file', fileInput.files[0]);
+
+        statusEl.innerHTML = '<div class="darkweb-scan"><div class="darkweb-spinner"></div>Analyzing passwords...</div>';
+        resultsEl.innerHTML = '';
+
+        var url = (window.PBA_URLS && window.PBA_URLS.bulkAudit) || '/bulk-audit/';
+
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': window.PBA_CSRF || '' },
+            body: formData,
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.error) {
+                statusEl.innerHTML = '<span class="error">' + data.error + '</span>';
+                return;
+            }
+
+            var colors = ['#ff3333', '#ff6600', '#ffcc00', '#66cc00', '#39ff14'];
+            var labelMap = ['Very Weak', 'Weak', 'Fair', 'Good', 'Strong'];
+
+            statusEl.innerHTML = '<b>' + data.count + '</b> password(s) analyzed.' +
+                (data.truncated ? ' <span class="error">(Truncated to 100)</span>' : '');
+
+            var html = '<div class="bulk-table-wrap"><table class="bulk-table">' +
+                '<thead><tr><th>#</th><th>Password</th><th>Length</th><th>Score</th><th>Entropy</th><th>Suggestions</th></tr></thead><tbody>';
+
+            data.results.forEach(function (r) {
+                var color = colors[r.score] || '#888';
+                html += '<tr>' +
+                    '<td>' + r.index + '</td>' +
+                    '<td class="mono">' + escapeHtml(r.masked) + '</td>' +
+                    '<td>' + r.length + '</td>' +
+                    '<td><span class="bulk-score" style="background:' + color + ';">' + r.score + '/4 ' + r.label + '</span></td>' +
+                    '<td>' + r.entropy + ' bits</td>' +
+                    '<td>' + (r.suggestions.length > 0 ? escapeHtml(r.suggestions.join('; ')) : '<span style="color:var(--color-primary);">OK</span>') + '</td>' +
+                    '</tr>';
+            });
+
+            html += '</tbody></table></div>';
+            resultsEl.innerHTML = html;
+        })
+        .catch(function (err) {
+            statusEl.innerHTML = '<span class="error">Network error. Please try again.</span>';
+            console.error('Bulk audit error:', err);
+        });
+    };
+
+    /**
+     * Escape HTML to prevent XSS in bulk results.
+     */
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    // ==========================================================================
     // Initialization
     // ==========================================================================
 
@@ -576,6 +881,9 @@
 
         // Range slider
         initRangeSlider();
+
+        // Passphrase slider
+        initPassphraseSlider();
 
         // Password strength meter
         var passwordInput = document.getElementById('password');

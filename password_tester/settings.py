@@ -63,7 +63,7 @@ ROOT_URLCONF = 'password_tester.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # Directory for custom templates
+        'DIRS': [],  # App templates are discovered via APP_DIRS
         'APP_DIRS': True,  # Enable app-specific templates
         'OPTIONS': {
             'context_processors': [
